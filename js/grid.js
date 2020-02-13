@@ -65,6 +65,7 @@ class Grid {
             this.tiles.push(column);
         }
         root.appendChild(grid);
+        this.grid = grid;
     }
 
     plain_scheme() {
@@ -86,6 +87,20 @@ class Grid {
         this.tiles[center + 1][1].classList.remove(CLASS_RACK);
         this.tiles[center - 2][1].classList.remove(CLASS_RACK);
         this.tiles[center + 2][1].classList.remove(CLASS_RACK);
+
+        const worker = mk_elem('circle.worker', SVG_NS, { attr: {
+            cx: this.tile_center(center),
+            cy: this.tile_center(0),
+            r: this.tile_size/2|0
+        }, data: {
+            x: center,
+            y: 0
+        }});
+        this.grid.appendChild(worker);
+    }
+
+    tile_center(n) {
+        return n * (this.tile_size + this.tile_margin) + (this.tile_size/2|0);
     }
 
     mk_matrix() {

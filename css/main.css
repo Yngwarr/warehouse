@@ -42,7 +42,9 @@ a:hover {
 
 #grid rect { fill: #55f; }
 #grid rect.rack { fill: #ff5; }
-#grid rect.load-zone { fill: #fa5; }
-#grid rect.unload-zone { fill: #f5a; }
+#grid rect.rack.full { fill: #aa5; }
+#grid rect.unload-zone { fill: #fa5; }
+#grid rect.unload-zone.full { fill: #a55; }
+#grid rect.load-zone { fill: #f5a; }
 #grid rect.path { fill: #5ff; }
-#grid rect.rack.full { fill: #aaa; }
+#grid .worker { fill: #fff; }
