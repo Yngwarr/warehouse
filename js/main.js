@@ -34,10 +34,10 @@ function mk_queue(gen, t_max) {
 
 function neighbors(x, y, sel) {
     return document.querySelectorAll(
-        `${sel}[data-x="${x-1}"][data-y="${y-1}"],`
-        + `${sel}[data-x="${x+1}"][data-y="${y-1}"]`
-        + `${sel}[data-x="${x-1}"][data-y="${y+1}"]`
-        + `${sel}[data-x="${x+1}"][data-y="${y+1}"]`
+        `${sel}[data-x="${x-1}"][data-y="${y}"],`
+        + `${sel}[data-x="${x+1}"][data-y="${y}"],`
+        + `${sel}[data-x="${x}"][data-y="${y+1}"],`
+        + `${sel}[data-x="${x}"][data-y="${y+1}"]`
     );
 }
 
@@ -47,9 +47,9 @@ function place(where, lot) {
 }
 
 function take(from) {
-    const lot = where.dataset.lot;
-    where.dataset.lot = EMPTY;
-    where.classList.remove('full');
+    const lot = from.dataset.lot;
+    from.dataset.lot = EMPTY;
+    from.classList.remove('full');
     return lot;
 }
 
@@ -72,6 +72,8 @@ function step(t, { grid, q_in, q_out, load_zones, unload_zones, workers, paths }
 
     for (let i = 0; i < workers.length; ++i) {
         let worker = workers[i];
+        const wx = parseInt(worker.dataset.x);
+        const wy = parseInt(worker.dataset.y);
         const target = worker.dataset.target;
         if (paths[i].length !== 0) {
             // TODO check if there's another worker in front
@@ -85,26 +87,56 @@ function step(t, { grid, q_in, q_out, load_zones, unload_zones, workers, paths }
             worker.dataset.lot = EMPTY;
             worker.dataset.target = EMPTY;
         } else if (target === 'unload') {
-            worker.dataset.lot = take(neighbors('.unload-zone.full')[0]);
+            worker.dataset.lot = take(neighbors(wx, wy, '.unload-zone.full')[0]);
             worker.dataset.target = 'rack';
+            paths[i] = find_path(grid, worker, '.rack:not(.full)');
         } else if (target === 'rack') {
-            // TODO this won't work with lot preferability
+            // TODO this won't work with categorized racke
             if (worker.dataset.lot === EMPTY) {
-                const rack = neighbors('.rack.full')[0];
+                const rack = neighbors(wx, wy, '.rack.full')[0];
                 worker.dataset.lot = take(rack);
                 worker.dataset.target = 'load';
+                paths[i] = find_path(grid, worker, '.load-zone');
             } else {
-                // TODO add lot preferability feature
-                const rack = neighbors('.rack:not(.full)')[0];
+                // TODO add categorized racks
+                const rack = neighbors(wx, wy, '.rack:not(.full)')[0];
                 place(rack, worker.dataset.lot);
                 worker.dataset.lot = EMPTY;
-                worker.dataset.target = 'unload';
+                worker.dataset.target = 'idle';
             }
         } else if (target === EMPTY) {
-            // TODO if q_out.last has a match among racks, find it and build path
+            let demand = _.last(q_in)[1];
+            if (demand) {
+                worker.dataset.target = 'unload';
+                paths[i] = find_path(grid, worker, '.unload-zone');
+            }
+        } else if (target === 'idle') {
+            let demand = _.last(q_out)[1];
+            if (demand) {
+                worker.dataset.target = 'rack';
+                paths[i] = find_path(grid, worker, `.rack.full[data-lot="${demand}"]`);
+            }
         }
         // TODO find the nearest full unload_zone and build path
     }
+}
+
+function find_path(grid, worker, sel) {
+    const x = parseInt(worker.dataset.x);
+    const y = parseInt(worker.dataset.y);
+    const rack = grid.nearest(sel, x, y);
+    if (rack === null) {
+        console.error("can't find a path!");
+        return [];
+    }
+    const dst = neighbors(
+        parseInt(rack.dataset.x),
+        parseInt(rack.dataset.y),
+        ':not(.rack)'
+    )[0];
+    const dx = parseInt(dst.dataset.x);
+    const dy = parseInt(dst.dataset.y);
+    return grid.path([x, y], [dx, dy]);
 }
 
 let grid;

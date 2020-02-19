@@ -37,6 +37,8 @@ class Grid {
     constructor(root, w, h) {
         this.tile_size = 12;
         this.tile_margin = 2;
+        this.group_size = 10;
+        this.groups = [];
         this.tiles = [];
         this.w = w;
         this.h = h;
@@ -47,6 +49,14 @@ class Grid {
             width: (this.tile_size + this.tile_margin) * w,
             height: (this.tile_size + this.tile_margin) * h
         }});
+
+        const group_num = this.group_number(w - 1, h - 1);
+        for (let i = 0; i <= group_num; ++i) {
+            const g = mk_elem('g', SVG_NS, { data: { n: i } });
+            this.groups.push(g);
+            grid.appendChild(g);
+        }
+
         for (let c = 0; c < w; ++c) {
             let column = [];
             for (let r = 0; r < h; ++r) {
@@ -60,12 +70,36 @@ class Grid {
                     data: { x: c, y: r }
                 });
                 column.push(rect);
-                grid.appendChild(rect);
+                this.groups[this.group_number(c, r)].appendChild(rect);
             }
             this.tiles.push(column);
         }
         root.appendChild(grid);
         this.grid = grid;
+    }
+
+    get g_w() { return Math.ceil(this.w / this.group_size); }
+    get g_h() { return Math.ceil(this.h / this.group_size); }
+
+    group_number(x, y) {
+        const gs = this.group_size;
+        return ((y / gs)|0) * this.g_w + ((x / gs)|0);
+    }
+
+    neighbor_groups(n) {
+        let res = [];
+        const hor = [n - 1, n + 1];
+        const vert = [n - this.g_w, n + this.g_w];
+        for (let i = 0; i < hor.length; ++i) {
+            // are on one line with n
+            if (hor[i] >= 0 && ((hor[i] / this.g_w)|0) === ((n / this.g_w)|0)) {
+                res.push(hor[i]);
+            }
+            if (vert[i] >= 0 && vert[i] < this.groups.length) {
+                res.push(vert[i]);
+            }
+        }
+        return res;
     }
 
     plain_scheme() {
@@ -122,8 +156,8 @@ class Grid {
         const [x1, y1] = from;
         const [x2, y2] = to;
         const path = this.finder.findPath(x1, y1, x2, y2, this.matrix);
-        this.paint(path, 'path');
-        return path;
+        //this.paint(path, 'path');
+        return path.reverse();
     }
 
     paint(path, class_name) {
@@ -132,5 +166,19 @@ class Grid {
             this.tiles[x][y].setAttribute('class', '');
             this.tiles[x][y].classList.add('path');
         }
+    }
+
+    nearest(sel, x, y) {
+        let gs = [this.group_number(x, y)];
+        let passed = [];
+        while (gs.length > 0) {
+            let g = gs.pop();
+            let cs = document.querySelectorAll(`g[data-n="${g}"] ${sel}`);
+            // TODO return the closest of all
+            if (cs.length > 0) return cs[0];
+            passed.push(g);
+            gs = gs + _.difference(this.neighbor_groups(g), passed, gs);
+        }
+        return null;
     }
 }
