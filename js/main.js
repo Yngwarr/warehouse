@@ -12,6 +12,22 @@ function take(from) {
     return lot;
 }
 
+function fill_with(lots) {
+    const empty = _.shuffle(Array.from(document.querySelectorAll('.rack:not(.full)')));
+    for (let l in lots) {
+        const rs = empty.splice(0, lots[l]);
+        rs.forEach(r => place(r, l));
+    }
+}
+
+function unload_with(lots) {
+    const unload = document.querySelector('.unload-zone');
+    for (let l in lots) {
+        const rs = document.querySelectorAll(`.rack.full[data-lot="${l}"]`);
+        // sort by distance
+    }
+}
+
 let grid;
 
 function init() {
