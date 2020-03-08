@@ -115,12 +115,60 @@ class Grid {
             }
         }
         const center = this.w / 2|0;
-        this.tiles[center - 1][0].classList.add(CLASS_LOAD);
-        this.tiles[center + 1][0].classList.add(CLASS_UNLOAD);
+        //this.tiles[center - 1][0].classList.add(CLASS_LOAD);
+        this.tiles[center][0].classList.add(CLASS_UNLOAD);
         this.tiles[center - 1][1].classList.remove(CLASS_RACK);
         this.tiles[center + 1][1].classList.remove(CLASS_RACK);
         this.tiles[center - 2][1].classList.remove(CLASS_RACK);
         this.tiles[center + 2][1].classList.remove(CLASS_RACK);
+
+        this.compute_distances(center, 0);
+    }
+
+    compute_distances(ori_x, ori_y) {
+        let path = [[ori_x, ori_y]];
+        let new_path = [];
+        let count = 0;
+        const same_or_passed = ([x, y], pth) => {
+            return this.tiles[x][y].classList.contains('passed')
+                || pth.filter(([px, py]) => px === x && py === y).length > 0;
+        };
+
+        while (path.length > 0) {
+            for (let i = 0; i < path.length; ++i) {
+                const [x, y] = path[i];
+                if (this.tiles[x][y].classList.contains(CLASS_RACK)) {
+                    this.tiles[x][y].dataset.dist = count;
+                }
+                this.tiles[x][y].classList.add('passed');
+
+                // add the neighborhood to a new path
+                let z;
+                if ((z = x + 1) < this.w) {
+                    if (!same_or_passed([z, y], new_path)) {
+                        new_path.push([z, y]);
+                    }
+                }
+                if ((z = x - 1) >= 0) {
+                    if (!same_or_passed([z, y], new_path)) {
+                        new_path.push([z, y]);
+                    }
+                }
+                if ((z = y + 1) < this.h) {
+                    if (!same_or_passed([x, z], new_path)) {
+                        new_path.push([x, z]);
+                    }
+                }
+                if ((z = y - 1) >= 0) {
+                    if (!same_or_passed([x, z], new_path)) {
+                        new_path.push([x, z]);
+                    }
+                }
+            }
+            path = new_path;
+            new_path = [];
+            ++count;
+        }
     }
 
     tile_center(n) {
