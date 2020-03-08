@@ -169,6 +169,9 @@ class Grid {
             new_path = [];
             ++count;
         }
+
+        document.querySelectorAll('.passed').forEach(x =>
+            x.classList.remove('passed'));
     }
 
     tile_center(n) {

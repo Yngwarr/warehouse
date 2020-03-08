@@ -6,6 +6,8 @@ function place(where, lot) {
 }
 
 function take(from) {
+    const warmth = parseInt(from.dataset.warmth) || 0;
+    from.dataset.warmth = warmth + 1;
     const lot = from.dataset.lot;
     from.dataset.lot = EMPTY;
     from.classList.remove('full');
@@ -21,16 +23,27 @@ function fill_with(lots) {
 }
 
 function unload_with(lots) {
-    const unload = document.querySelector('.unload-zone');
+    let total_distance = 0;
     for (let l in lots) {
-        const rs = document.querySelectorAll(`.rack.full[data-lot="${l}"]`);
-        // sort by distance
+        const racks = Array.from(document.querySelectorAll(`.rack.full[data-lot="${l}"]`));
+        racks.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist));
+        const rs = racks.splice(0, lots[l]);
+        rs.forEach(r => {
+            take(r);
+            total_distance += 2 * parseInt(r.dataset.dist);
+        });
     }
+    return total_distance;
 }
 
 let grid;
+const input = { a: 15, b: 50, c: 30, d: 90 };
+const output = { a: 9, b: 35, c: 13, d: 50 };
 
 function init() {
     grid = new Grid(document.body, 75, 50);
     grid.plain_scheme();
+
+    //fill_with(input);
+    //console.log(unload_with(output));
 }
