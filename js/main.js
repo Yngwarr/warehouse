@@ -37,12 +37,16 @@ function unload_with(lots) {
 }
 
 let grid;
+let ctrl;
 const input = { a: 15, b: 50, c: 30, d: 90 };
 const output = { a: 9, b: 35, c: 13, d: 50 };
 
 function init() {
     grid = new Grid(document.body, 75, 50);
     grid.plain_scheme();
+
+    ctrl = new Ctrl();
+    ctrl.number('in-a', 'a');
 
     //fill_with(input);
     //console.log(unload_with(output));
