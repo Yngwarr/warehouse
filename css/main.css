@@ -53,7 +53,7 @@ a:hover {
 
 .panel > * {
     display: block;
-    margin: 2rem;
+    margin: 1rem 2rem;
 }
 
 .panel input {
@@ -90,9 +90,14 @@ input[type=number]::-webkit-outer-spin-button {
 
 #grid rect { fill: #55f; }
 #grid rect.rack { fill: #ff5; }
-#grid rect.rack.full { fill: #aa5; }
+/*#grid rect.rack.full { fill: #aa5; }*/
 #grid rect.unload-zone { fill: #fa5; }
-#grid rect.unload-zone.full { fill: #a55; }
 #grid rect.load-zone { fill: #f5a; }
 #grid rect.path { fill: #5ff; }
 #grid .worker { fill: #fff; }
+
+#grid rect[data-lot="a"] { fill: #aaa }
+#grid rect[data-lot="b"] { fill: #5aa }
+#grid rect[data-lot="c"] { fill: #a5a }
+#grid rect[data-lot="d"] { fill: #a55 }
+#grid rect[data-lot="e"] { fill: #55a }

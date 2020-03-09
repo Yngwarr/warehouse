@@ -20,4 +20,10 @@ class Ctrl {
         }
         this.panel.appendChild(label);
     }
+    button(id, text, callback) {
+        let button = mk_elem(`button#${id}`);
+        button.appendChild(document.createTextNode(text));
+        button.addEventListener('click', callback);
+        this.panel.appendChild(button);
+    }
 }

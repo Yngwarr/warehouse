@@ -46,7 +46,8 @@ function init() {
     grid.plain_scheme();
 
     ctrl = new Ctrl();
-    ctrl.number('in-a', 'a');
+    ctrl.button('btn-fill', 'Fill', () => fill_with(input));
+    ctrl.button('btn-unload', 'Unload', () => unload_with(output));
 
     //fill_with(input);
     //console.log(unload_with(output));
