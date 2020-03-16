@@ -61,9 +61,10 @@ a:hover {
     margin-left: 1rem;
 }
 
-label {
+label, .panel > h1 {
     font-size: 1.4rem;
     font-weight: bold;
+    color: #fff;
 }
 
 label > input {
@@ -101,3 +102,12 @@ input[type=number]::-webkit-outer-spin-button {
 #grid rect[data-lot="c"] { fill: #a5a }
 #grid rect[data-lot="d"] { fill: #a55 }
 #grid rect[data-lot="e"] { fill: #55a }
+
+#grid rect.heat-0 { fill: #fcfcfc }
+#grid rect.heat-1 { fill: #fcfc84 }
+#grid rect.heat-2 { fill: #fcfc10 }
+#grid rect.heat-3 { fill: #fce000 }
+#grid rect.heat-4 { fill: #fcb400 }
+#grid rect.heat-5 { fill: #fc7400 }
+#grid rect.heat-6 { fill: #fc3000 }
+#grid rect.heat-7 { fill: #980000 }

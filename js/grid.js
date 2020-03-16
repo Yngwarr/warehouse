@@ -4,6 +4,8 @@ const CLASS_RACK = 'rack';
 const CLASS_LOAD = 'load-zone';
 const CLASS_UNLOAD = 'unload-zone';
 
+const MAX_HEAT = 7;
+
 function slice_to_char(str, from, to) {
     const indices = to.map(s => str.indexOf(s)).filter(i => i > -1);
     return str.slice(from, Math.min(...indices))
@@ -44,6 +46,7 @@ class Grid {
         this.h = h;
         this.matrix = null;
         this.finder = new PF.AStarFinder();
+        this.heatmap_on = false;
 
         let grid = mk_elem('svg#grid', SVG_NS, { attr: {
             width: (this.tile_size + this.tile_margin) * w,
@@ -221,5 +224,28 @@ class Grid {
             gs = gs + _.difference(this.neighbor_groups(g), passed, gs);
         }
         return null;
+    }
+
+    show_heatmap() {
+        const racks = document.querySelectorAll('.rack').forEach(r => {
+            const heat = parseInt(r.dataset.heat, 10) || 0;
+            let heat_class;
+            heat_class = 0;
+            if (heat > 0) heat_class = 1;
+            for (let i = 2; i <= MAX_HEAT; ++i) {
+                if (heat >= 5*(i-1)) heat_class = i;
+            }
+            r.classList.add(`heat-${heat_class}`);
+        });
+        this.heatmap_on = true;
+    }
+
+    hide_heatmap() {
+        for (let i = 0; i <= 7; ++i) {
+            document.querySelectorAll(`.rack.heat-${i}`).forEach(r => {
+                r.classList.remove(`heat-${i}`);
+            });
+        }
+        this.heatmap_on = false;
     }
 }

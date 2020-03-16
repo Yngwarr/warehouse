@@ -6,8 +6,8 @@ function place(where, lot) {
 }
 
 function take(from) {
-    const warmth = parseInt(from.dataset.warmth) || 0;
-    from.dataset.warmth = warmth + 1;
+    const heat = parseInt(from.dataset.heat) || 0;
+    from.dataset.heat = heat + 1;
     const lot = from.dataset.lot;
     from.dataset.lot = EMPTY;
     from.classList.remove('full');
@@ -45,10 +45,52 @@ function init() {
     grid = new Grid(document.body, 75, 50);
     grid.plain_scheme();
 
-    ctrl = new Ctrl();
-    ctrl.button('btn-fill', 'Fill', () => fill_with(input));
-    ctrl.button('btn-unload', 'Unload', () => unload_with(output));
+    let mileage = 0;
+    let corridor_size = 5;
 
-    //fill_with(input);
-    //console.log(unload_with(output));
+    const update_mileage = span => span.innerText = mileage * corridor_size;
+
+    ctrl = new Ctrl();
+    const mile_label = ctrl.span('mileage', 'Distance covered', 0, 'm');
+    ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, e => {
+        corridor_size = parseFloat(e.target.value);
+        update_mileage(mile_label);
+    });
+
+    ctrl.header('Import');
+    for (let i in input) {
+        ctrl.number(`import-${i}`, `Lot "${i}"`, null, input[i], 0, 999, e =>{
+            input[i] = parseInt(e.target.value, 10);
+        })
+    }
+    ctrl.button('btn-fill', 'Import', () => {
+        if (grid.heatmap_on) grid.hide_heatmap();
+        fill_with(input);
+    });
+
+    ctrl.header('Export');
+    for (let i in input) {
+        ctrl.number(`export-${i}`, `Lot "${i}"`, null, output[i], 0, 999, e =>{
+            output[i] = parseInt(e.target.value, 10);
+        })
+    }
+    ctrl.button('btn-unload', 'Export', () => {
+        if (grid.heatmap_on) grid.hide_heatmap();
+        mileage += unload_with(output);
+        update_mileage(mile_label);
+    });
+
+    ctrl.button('btn-step', 'Step', () => {
+        if (grid.heatmap_on) grid.hide_heatmap();
+        fill_with(input);
+        mileage += unload_with(output);
+        update_mileage(mile_label);
+    });
+    ctrl.button('btn-heat', 'Toggle heatmap', () => {
+        if (grid.heatmap_on) {
+            grid.hide_heatmap();
+        } else {
+            grid.show_heatmap();
+        }
+    });
 }
