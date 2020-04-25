@@ -11,6 +11,7 @@ function slice_to_char(str, from, to) {
     return str.slice(from, Math.min(...indices))
 }
 
+// e.g.: mk_elem('svg#grid', SVG_NS, {attr: { width: 8, height: 8 }})
 function mk_elem(sel, ns = null, params = { attr: {}, data: {}, style: {} }) {
     const tag = sel[0] === '#' || sel[0] === '.'
         ? 'div'
@@ -37,8 +38,8 @@ function mk_elem(sel, ns = null, params = { attr: {}, data: {}, style: {} }) {
 
 class Grid {
     constructor(root, w, h) {
-        this.tile_size = 12;
-        this.tile_margin = 2;
+        this.tile_size = 7;
+        this.tile_margin = 1;
         this.group_size = 10;
         this.groups = [];
         this.tiles = [];
@@ -105,6 +106,7 @@ class Grid {
         return res;
     }
 
+    // schemes: (1) spawn racks, (2) compute distances
     plain_scheme() {
         this.matrix = null;
         let i, j;
@@ -175,6 +177,43 @@ class Grid {
 
         document.querySelectorAll('.passed').forEach(x =>
             x.classList.remove('passed'));
+    }
+
+    real_scheme() {
+        this.matrix = null;
+        let i, j;
+
+        // sector 2
+        const S2_ORI = 42;
+        for (i = S2_ORI; i < S2_ORI + 32; ++i) {
+            for (j = 4; j < 43; j += 3) {
+                this.tiles[i][j].classList.add(CLASS_RACK);
+                this.tiles[i][j+1].classList.add(CLASS_RACK);
+            }
+        }
+        for (i = 1; i < 65; ++i) {
+            if (i === 32) continue;
+            // sector 1
+            this.tiles[1][i].classList.add(CLASS_RACK);
+            this.tiles[19][i].classList.add(CLASS_RACK);
+            for (j = 3; j < 39; j += 3) {
+                if (j === 18) j += 3;
+                this.tiles[j][i].classList.add(CLASS_RACK);
+                this.tiles[j+1][i].classList.add(CLASS_RACK);
+            }
+
+            // sector 3
+            const S3_ORI = 76;
+            this.tiles[S3_ORI+15][i].classList.add(CLASS_RACK);
+            this.tiles[S3_ORI+27][i].classList.add(CLASS_RACK);
+            for (j = S3_ORI; j < S3_ORI+27; j += 3) {
+                if (j === S3_ORI+15) j += 3;
+                this.tiles[j][i].classList.add(CLASS_RACK);
+                this.tiles[j+1][i].classList.add(CLASS_RACK);
+            }
+        }
+        const center = this.w / 2|0;
+        this.compute_distances(center, 0);
     }
 
     tile_center(n) {
