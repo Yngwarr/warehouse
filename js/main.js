@@ -42,7 +42,7 @@ const input = { a: 15, b: 50, c: 30, d: 90 };
 const output = { a: 9, b: 35, c: 13, d: 50 };
 
 function init() {
-    grid = new Grid(document.body, 105, 66);
+    grid = new Grid(document.body, 105, 68);
     grid.real_scheme();
 
     let mileage = 0;

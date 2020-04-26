@@ -90,7 +90,8 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 #grid rect { fill: #36354d; }
-#grid rect.rack { fill: #ffeb33; }
+#grid rect.rack { fill: #fffb83; }
+/*#grid rect.rack { fill: #ffeb33; }*/
 /*#grid rect.rack.full { fill: #aa5; }*/
 #grid rect.unload-zone { fill: #fafffc; }
 #grid rect.load-zone { fill: #f5a; }

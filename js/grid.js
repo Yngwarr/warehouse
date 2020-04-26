@@ -179,6 +179,7 @@ class Grid {
             x.classList.remove('passed'));
     }
 
+    // scheme based on a real warehouse
     real_scheme() {
         this.matrix = null;
         let i, j;
@@ -186,12 +187,12 @@ class Grid {
         // sector 2
         const S2_ORI = 42;
         for (i = S2_ORI; i < S2_ORI + 32; ++i) {
-            for (j = 4; j < 43; j += 3) {
+            for (j = 5; j < 63; j += 4) {
                 this.tiles[i][j].classList.add(CLASS_RACK);
                 this.tiles[i][j+1].classList.add(CLASS_RACK);
             }
         }
-        for (i = 1; i < 65; ++i) {
+        for (i = 2; i < 66; ++i) {
             if (i === 32) continue;
             // sector 1
             this.tiles[1][i].classList.add(CLASS_RACK);
@@ -212,8 +213,8 @@ class Grid {
                 this.tiles[j+1][i].classList.add(CLASS_RACK);
             }
         }
-        const center = this.w / 2|0;
-        this.compute_distances(center, 0);
+        this.tiles[this.w - 1][0].classList.add(CLASS_UNLOAD);
+        this.compute_distances(this.w - 1, 0);
     }
 
     tile_center(n) {
