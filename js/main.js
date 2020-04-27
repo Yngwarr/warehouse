@@ -1,4 +1,5 @@
 const EMPTY = '_';
+const HOURS_PER_DAY = 16;
 
 function place(where, lot) {
     where.classList.add('full');
@@ -14,10 +15,13 @@ function take(from) {
     return lot;
 }
 
+// fill and unload
 function fill_with(lots) {
+    // TODO non-random algorithm
     const empty = _.shuffle(Array.from(document.querySelectorAll('.rack:not(.full)')));
     for (let l in lots) {
         const rs = empty.splice(0, lots[l]);
+        if (rs.length < lots[l]) console.warn(`${l} demand to low`);
         rs.forEach(r => place(r, l));
     }
 }
@@ -28,6 +32,7 @@ function unload_with(lots) {
         const racks = Array.from(document.querySelectorAll(`.rack.full[data-lot="${l}"]`));
         racks.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist));
         const rs = racks.splice(0, lots[l]);
+        if (rs.length < lots[l]) console.warn(`${l} demand to high`);
         rs.forEach(r => {
             take(r);
             total_distance += 2 * parseInt(r.dataset.dist);
@@ -38,12 +43,33 @@ function unload_with(lots) {
 
 let grid;
 let ctrl;
-const input = { a: 15, b: 50, c: 30, d: 90 };
-const output = { a: 9, b: 35, c: 13, d: 50 };
+const daily = { a: 1072, b: 417, c: 329, d: 463 };
+
+// storage
+let supply = { a: 0, b: 0, c: 0, d: 0 };
+let demand = { a: 0, b: 0, c: 0, d: 0 };
+
+let distrib = { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
+
+let round_down = true;
+function compute_hourly_io() {
+    // TODO log extras
+    for (let i in daily) {
+        supply[i] += ((daily[i] / HOURS_PER_DAY)|0) + (round_down ? 1 : 0);
+        const a = (2/3)*supply[i];
+        const b = (4/3)*supply[i];
+        demand[i] += ((a + (b - a) * jStat.beta.sample(...distrib[i]))|0) + (round_down ? 0 : 1);
+    }
+    round_down = !round_down;
+    console.log(JSON.stringify(supply))
+    console.log(JSON.stringify(demand))
+    console.log('--------')
+}
 
 function init() {
     grid = new Grid(document.body, 105, 68);
     grid.real_scheme();
+    fill_with(objMap(daily, x => (x/2)|0));
 
     let mileage = 0;
     let corridor_size = 5;
@@ -57,34 +83,47 @@ function init() {
         update_mileage(mile_label);
     });
 
-    ctrl.header('Import');
-    for (let i in input) {
-        ctrl.number(`import-${i}`, `Lot "${i}"`, null, input[i], 0, 999, e =>{
-            input[i] = parseInt(e.target.value, 10);
-        })
+    ctrl.header('Supply');
+    for (let i in supply) {
+        ctrl.number(`import-${i}`, `Lot "${i}"`, null, supply[i], 0, 999, e =>{
+            supply[i] = parseInt(e.target.value, 10);
+        });
     }
     ctrl.button('btn-fill', 'Import', () => {
         if (grid.heatmap_on) grid.hide_heatmap();
-        fill_with(input);
+        // TODO compute difference
+        fill_with(supply);
+        for (let i in supply) supply[i] = 0;
     });
 
-    ctrl.header('Export');
-    for (let i in input) {
-        ctrl.number(`export-${i}`, `Lot "${i}"`, null, output[i], 0, 999, e =>{
-            output[i] = parseInt(e.target.value, 10);
-        })
-    }
+    //ctrl.header('Export');
+    //for (let i in input) {
+        //ctrl.number(`export-${i}`, `Lot "${i}"`, null, output[i], 0, 999, e =>{
+            //output[i] = parseInt(e.target.value, 10);
+        //})
+    //}
     ctrl.button('btn-unload', 'Export', () => {
         if (grid.heatmap_on) grid.hide_heatmap();
-        mileage += unload_with(output);
+        mileage += unload_with(demand);
         update_mileage(mile_label);
+        for (let i in demand) demand[i] = 0;
     });
 
-    ctrl.button('btn-step', 'Step', () => {
+    let steps = 0;
+    let step = e => {
         if (grid.heatmap_on) grid.hide_heatmap();
-        fill_with(input);
-        mileage += unload_with(output);
+        compute_hourly_io();
+        fill_with(supply);
+        mileage += unload_with(demand);
         update_mileage(mile_label);
+        for (let i in supply) supply[i] = 0;
+        for (let i in demand) demand[i] = 0;
+        e.target.innerText = `Step (${++steps})`;
+    };
+    ctrl.button('btn-step', 'Step', e => {
+        for (let i = 0; i < 300; ++i) {
+            step(e);
+        }
     });
     ctrl.button('btn-heat', 'Toggle heatmap', () => {
         if (grid.heatmap_on) {

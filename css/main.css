@@ -100,7 +100,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 #grid rect[data-lot="a"] { fill: #dc435b }
 #grid rect[data-lot="b"] { fill: #3f48c2 }
-#grid rect[data-lot="c"] { fill: #a7f547 }
+#grid rect[data-lot="c"] { fill: #2bdb72 }
 #grid rect[data-lot="d"] { fill: #f58931 }
 
 #grid rect.heat-0 { fill: #fcfcfc }

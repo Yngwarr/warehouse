@@ -1,3 +1,11 @@
+function objMap(obj, func) {
+    let res = {};
+    for (let i in obj) {
+        res[i] = func(obj[i], i);
+    }
+    return res;
+}
+
 class Ctrl {
     constructor() {
         this.panel = mk_elem('.panel');
