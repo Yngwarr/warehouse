@@ -40,7 +40,8 @@ class Grid {
     constructor(root, w, h) {
         this.tile_size = 7;
         this.tile_margin = 1;
-        this.group_size = 10;
+        // carefully picked
+        this.group_size = 24;
         this.groups = [];
         this.tiles = [];
         this.w = w;
@@ -87,7 +88,20 @@ class Grid {
 
     group_number(x, y) {
         const gs = this.group_size;
-        return ((y / gs)|0) * this.g_w + ((x / gs)|0);
+        return (y / gs | 0) * this.g_w + (x / gs | 0);
+    }
+
+    enum_groups(_x, _y) {
+        const gw = (this.w / this.group_size | 0) + 1;
+        const gh = (this.h / this.group_size | 0) + 1;
+        const ori = this.group_number(_x, _y);
+        const x = ori % gw;
+        const y = ori / gw | 0;
+        for (let i = 0; i < gh; ++i) {
+            for (let j = 0; j < gw; ++j) {
+                this.groups[i*gw + j].dataset.d = Math.abs(y*gw + j - ori) + Math.abs(i - y);
+            }
+        }
     }
 
     neighbor_groups(n) {
@@ -213,8 +227,12 @@ class Grid {
                 this.tiles[j+1][i].classList.add(CLASS_RACK);
             }
         }
-        this.tiles[this.w - 1][0].classList.add(CLASS_UNLOAD);
-        this.compute_distances(this.w - 1, 0);
+
+        const ori_x = this.w - 1;
+        const ori_y = 0;
+        this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
+        grid.enum_groups(ori_x, ori_y);
+        this.compute_distances(ori_x, ori_y);
     }
 
     tile_center(n) {
