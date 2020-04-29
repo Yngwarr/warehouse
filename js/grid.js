@@ -104,6 +104,14 @@ class Grid {
         }
     }
 
+    type_groups(type, gnums) {
+        for (let i = 0; i < gnums.length; ++i) {
+            this.groups[gnums[i]].querySelectorAll('.rack').forEach(x => {
+                x.dataset.type = type;
+            });
+        }
+    }
+
     neighbor_groups(n) {
         let res = [];
         const hor = [n - 1, n + 1];
@@ -231,7 +239,13 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        grid.enum_groups(ori_x, ori_y);
+
+        //this.enum_groups(ori_x, ori_y);
+        this.type_groups('a', [2,3,4,7,8,9,14]);
+        this.type_groups('b', [0,1,6]);
+        this.type_groups('c', [5,10]);
+        this.type_groups('d', [11,12,13]);
+
         this.compute_distances(ori_x, ori_y);
     }
 

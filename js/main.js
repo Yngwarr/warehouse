@@ -18,8 +18,8 @@ function take(from) {
 // fill and unload
 function fill_with(lots) {
     // TODO non-random algorithm
-    const empty = _.shuffle(Array.from(document.querySelectorAll('.rack:not(.full)')));
     for (let l in lots) {
+        const empty = _.shuffle(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)));
         const rs = empty.splice(0, lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to low`);
         rs.forEach(r => place(r, l));
