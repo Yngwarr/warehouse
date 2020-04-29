@@ -15,6 +15,27 @@ function take(from) {
     return lot;
 }
 
+function q_take(qs, n) {
+    let acc = 0;
+    let left = n;
+    let res = [];
+    const len = qs.length;
+    for (let i = 0; i < len; ++i) {
+        const q = qs[i].splice(0, left);
+        if (qs[i].length === 0) {
+            acc++;
+        }
+        res = res.concat(q);
+        left -= q.length;
+        if (left === 0) break;
+    }
+    while (acc-- > 0) qs.shift();
+    return res;
+}
+
+// older to newer
+let queue = { a: [], b: [], c: [], d: [] };
+
 // fill and unload
 function fill_with(lots) {
     // TODO non-random algorithm
@@ -23,15 +44,14 @@ function fill_with(lots) {
         const rs = empty.splice(0, lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to low`);
         rs.forEach(r => place(r, l));
+        queue[l].push(rs.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist)));
     }
 }
 
 function unload_with(lots) {
     let total_distance = 0;
     for (let l in lots) {
-        const racks = Array.from(document.querySelectorAll(`.rack.full[data-lot="${l}"]`));
-        racks.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist));
-        const rs = racks.splice(0, lots[l]);
+        const rs = q_take(queue[l], lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to high`);
         rs.forEach(r => {
             take(r);
