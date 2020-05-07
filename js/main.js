@@ -40,7 +40,8 @@ let queue = { a: [], b: [], c: [], d: [] };
 function fill_with(lots) {
     // TODO non-random algorithm
     for (let l in lots) {
-        const empty = _.shuffle(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)));
+        const empty = _.sortBy(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)),
+            x => parseInt(x.dataset.dist, 10));
         const rs = empty.splice(0, lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to low`);
         rs.forEach(r => place(r, l));
