@@ -6,9 +6,9 @@ function objMap(obj, func) {
     return res;
 }
 
-function objAdd(a, b) {
+function objAdd(a, b, fn=null) {
     for (let i in a) {
-        a[i] += b[i];
+        a[i] += fn ? fn(b[i]) : b[i];
     }
     return a;
 }

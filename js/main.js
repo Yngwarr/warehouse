@@ -37,6 +37,7 @@ function q_take(qs, n) {
 let queue = { a: [], b: [], c: [], d: [] };
 
 // fill and unload
+// leaves only extras in lots
 function fill_with(lots) {
     for (let l in lots) {
         const empty = _.sortBy(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)),
@@ -49,6 +50,7 @@ function fill_with(lots) {
     }
 }
 
+// leaves only extras in lots
 function unload_with(lots) {
     let total_distance = 0;
     for (let l in lots) {
@@ -78,7 +80,6 @@ let distrib = { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
 
 let round_down = true;
 function compute_hourly_io() {
-    // TODO log extras
     for (let i in daily) {
         supply[i] += ((daily[i] / HOURS_PER_DAY)|0) + (round_down ? 1 : 0);
         const a = (2/3)*supply[i];
@@ -137,11 +138,22 @@ function init() {
     let steps = 0;
     let step = e => {
         if (grid.heatmap_on) grid.hide_heatmap();
+
+        let produced = objGen(supply, () => 0);
+        let shipped = objGen(supply, () => 0);
         compute_hourly_io();
+        objAdd(produced, supply);
+        objAdd(shipped, demand);
+
         fill_with(supply);
         mileage += unload_with(demand);
         update_mileage(mile_label);
         e.target.innerText = `Step (${++steps})`;
+
+        objAdd(produced, supply, x => -x);
+        objAdd(shipped, demand, x => -x);
+        update_spans('produced', produced, (a, b) => a + b);
+        update_spans('shipped', shipped, (a, b) => a + b);
     };
     ctrl.button('btn-step', 'Step', e => {
         for (let i = 0; i < step_count; ++i) {
@@ -165,6 +177,18 @@ function init() {
     ctrl.header('Now presented');
     for (let i in supply) {
         ctrl.span(`filled-${i}`, `Lot "${i}"`, supply[i], 'pallets');
+    }
+
+    ctrl.hr();
+    ctrl.header('Produced');
+    for (let i in supply) {
+        ctrl.span(`produced-${i}`, `Lot "${i}"`, supply[i], 'pallets');
+    }
+
+    ctrl.hr();
+    ctrl.header('Shipped');
+    for (let i in supply) {
+        ctrl.span(`shipped-${i}`, `Lot "${i}"`, supply[i], 'pallets');
     }
 
     // default values
