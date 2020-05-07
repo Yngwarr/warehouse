@@ -38,12 +38,12 @@ let queue = { a: [], b: [], c: [], d: [] };
 
 // fill and unload
 function fill_with(lots) {
-    // TODO non-random algorithm
     for (let l in lots) {
         const empty = _.sortBy(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)),
             x => parseInt(x.dataset.dist, 10));
         const rs = empty.splice(0, lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to low`);
+        lots[l] -= rs.length;
         rs.forEach(r => place(r, l));
         queue[l].push(rs.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist)));
     }
@@ -54,6 +54,7 @@ function unload_with(lots) {
     for (let l in lots) {
         const rs = q_take(queue[l], lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to high`);
+        lots[l] -= rs.length;
         rs.forEach(r => {
             take(r);
             total_distance += 2 * parseInt(r.dataset.dist);
@@ -69,6 +70,9 @@ const daily = { a: 1072, b: 417, c: 329, d: 463 };
 // storage
 let supply = { a: 0, b: 0, c: 0, d: 0 };
 let demand = { a: 0, b: 0, c: 0, d: 0 };
+// stats on low or high supplies
+let over_supply = { a: 0, b: 0, c: 0, d: 0 };
+let over_demand = { a: 0, b: 0, c: 0, d: 0 };
 
 let distrib = { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
 
@@ -87,6 +91,18 @@ function compute_hourly_io() {
     console.log('--------')
 }
 
+function update_spans(name, values, fn=null) {
+    for (let i in values) {
+        const span = document.getElementById(`${name}-${i}`);
+        if (fn) {
+            let val = parseInt(span.innerText, 10);
+            span.innerText = fn(val, values[i]);
+        } else {
+            span.innerText = values[i];
+        }
+    }
+}
+
 function init() {
     grid = new Grid(document.body, 105, 68);
     grid.real_scheme();
@@ -94,7 +110,7 @@ function init() {
 
     let mileage = 0;
     let corridor_size = 1;
-    let step_count = 300;
+    let step_count = 1;
 
     const update_mileage = span => span.innerText = mileage * corridor_size;
 
@@ -105,13 +121,13 @@ function init() {
         update_mileage(mile_label);
     });
 
-    ctrl.hr();
+    /*ctrl.hr();
     ctrl.header('Supply');
     for (let i in supply) {
         ctrl.number(`import-${i}`, `Lot "${i}"`, null, supply[i], 0, 999, e =>{
             supply[i] = parseInt(e.target.value, 10);
         });
-    }
+    }*/
 
     ctrl.hr();
     ctrl.number('step-ctl', 'Step = ', 'hours', step_count, 1, 1000, e => {
@@ -125,14 +141,17 @@ function init() {
         fill_with(supply);
         mileage += unload_with(demand);
         update_mileage(mile_label);
-        for (let i in supply) supply[i] = 0;
-        for (let i in demand) demand[i] = 0;
         e.target.innerText = `Step (${++steps})`;
     };
     ctrl.button('btn-step', 'Step', e => {
         for (let i = 0; i < step_count; ++i) {
             step(e);
+            objAdd(over_supply, supply);
+            objAdd(over_demand, demand);
+            objSet(supply, 0);
+            objSet(demand, 0);
         }
+        update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
     });
     ctrl.button('btn-heat', 'Toggle heatmap', () => {
         if (grid.heatmap_on) {
@@ -141,4 +160,13 @@ function init() {
             grid.show_heatmap();
         }
     });
+
+    ctrl.hr();
+    ctrl.header('Now presented');
+    for (let i in supply) {
+        ctrl.span(`filled-${i}`, `Lot "${i}"`, supply[i], 'pallets');
+    }
+
+    // default values
+    update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
 }
