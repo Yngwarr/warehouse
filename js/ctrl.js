@@ -58,4 +58,9 @@ class Ctrl {
         this.panel.appendChild(h1);
         return h1;
     }
+    hr() {
+        let hr = mk_elem('hr');
+        this.panel.appendChild(hr);
+        return hr;
+    }
 }

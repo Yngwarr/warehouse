@@ -93,7 +93,8 @@ function init() {
     fill_with(objMap(daily, x => (x/2)|0));
 
     let mileage = 0;
-    let corridor_size = 5;
+    let corridor_size = 1;
+    let step_count = 300;
 
     const update_mileage = span => span.innerText = mileage * corridor_size;
 
@@ -104,30 +105,17 @@ function init() {
         update_mileage(mile_label);
     });
 
+    ctrl.hr();
     ctrl.header('Supply');
     for (let i in supply) {
         ctrl.number(`import-${i}`, `Lot "${i}"`, null, supply[i], 0, 999, e =>{
             supply[i] = parseInt(e.target.value, 10);
         });
     }
-    ctrl.button('btn-fill', 'Import', () => {
-        if (grid.heatmap_on) grid.hide_heatmap();
-        // TODO compute difference
-        fill_with(supply);
-        for (let i in supply) supply[i] = 0;
-    });
 
-    //ctrl.header('Export');
-    //for (let i in input) {
-        //ctrl.number(`export-${i}`, `Lot "${i}"`, null, output[i], 0, 999, e =>{
-            //output[i] = parseInt(e.target.value, 10);
-        //})
-    //}
-    ctrl.button('btn-unload', 'Export', () => {
-        if (grid.heatmap_on) grid.hide_heatmap();
-        mileage += unload_with(demand);
-        update_mileage(mile_label);
-        for (let i in demand) demand[i] = 0;
+    ctrl.hr();
+    ctrl.number('step-ctl', 'Step = ', 'hours', step_count, 1, 1000, e => {
+        step_count = parseInt(e.target.value, 10);
     });
 
     let steps = 0;
@@ -142,7 +130,7 @@ function init() {
         e.target.innerText = `Step (${++steps})`;
     };
     ctrl.button('btn-step', 'Step', e => {
-        for (let i = 0; i < 300; ++i) {
+        for (let i = 0; i < step_count; ++i) {
             step(e);
         }
     });
