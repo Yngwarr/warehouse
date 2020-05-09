@@ -1,5 +1,5 @@
 const EMPTY = '_';
-const HOURS_PER_DAY = 16;
+const HOURS_PER_DAY = 24;
 
 function place(where, lot) {
     where.classList.add('full');

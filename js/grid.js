@@ -132,7 +132,7 @@ class Grid {
     plain_scheme() {
         this.matrix = null;
         let i, j;
-        for (i = 1; i < this.h - 1; ++i) {
+        for (i = 2; i < this.h - 2; ++i) {
             this.tiles[0][i].classList.add(CLASS_RACK);
             this.tiles[this.w - 1][i].classList.add(CLASS_RACK);
             for (j = 2; j < this.w - 2; j += 3) {
@@ -141,15 +141,88 @@ class Grid {
                 this.tiles[j+1][i].classList.add(CLASS_RACK);
             }
         }
-        const center = this.w / 2|0;
-        //this.tiles[center - 1][0].classList.add(CLASS_LOAD);
-        this.tiles[center][0].classList.add(CLASS_UNLOAD);
-        this.tiles[center - 1][1].classList.remove(CLASS_RACK);
-        this.tiles[center + 1][1].classList.remove(CLASS_RACK);
-        this.tiles[center - 2][1].classList.remove(CLASS_RACK);
-        this.tiles[center + 2][1].classList.remove(CLASS_RACK);
 
-        this.compute_distances(center, 0);
+        const ori_x = this.w - 1;
+        const ori_y = 0;
+        this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
+
+        this.type_groups('a', [2,3,4,7,8,9,14]);
+        this.type_groups('b', [0,1,6]);
+        this.type_groups('c', [5,10]);
+        this.type_groups('d', [11,12,13]);
+
+        this.compute_distances(ori_x, ori_y);
+    }
+
+    horiz_scheme() {
+        this.matrix = null;
+        let i, j;
+        for (i = 2; i < this.w - 2; ++i) {
+            for (j = 2; j < this.h - 2; j += 3) {
+                if (i === (this.h / 2)|0) break;
+                this.tiles[i][j].classList.add(CLASS_RACK);
+                this.tiles[i+1][j].classList.add(CLASS_RACK);
+            }
+        }
+
+        const ori_x = this.w - 1;
+        const ori_y = 0;
+        this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
+
+        this.type_groups('a', [2,3,4,7,8,9,14]);
+        this.type_groups('b', [0,1,6]);
+        this.type_groups('c', [5,10]);
+        this.type_groups('d', [11,12,13]);
+
+        this.compute_distances(ori_x, ori_y);
+    }
+
+    // scheme based on a real warehouse
+    real_scheme() {
+        this.matrix = null;
+        let i, j;
+
+        // sector 2
+        const S2_ORI = 42;
+        for (i = S2_ORI; i < S2_ORI + 32; ++i) {
+            for (j = 5; j < 63; j += 4) {
+                this.tiles[i][j].classList.add(CLASS_RACK);
+                this.tiles[i][j+1].classList.add(CLASS_RACK);
+            }
+        }
+        for (i = 2; i < 66; ++i) {
+            if (i === 32) continue;
+            // sector 1
+            this.tiles[1][i].classList.add(CLASS_RACK);
+            this.tiles[19][i].classList.add(CLASS_RACK);
+            for (j = 3; j < 39; j += 3) {
+                if (j === 18) j += 3;
+                this.tiles[j][i].classList.add(CLASS_RACK);
+                this.tiles[j+1][i].classList.add(CLASS_RACK);
+            }
+
+            // sector 3
+            const S3_ORI = 76;
+            this.tiles[S3_ORI+15][i].classList.add(CLASS_RACK);
+            this.tiles[S3_ORI+27][i].classList.add(CLASS_RACK);
+            for (j = S3_ORI; j < S3_ORI+27; j += 3) {
+                if (j === S3_ORI+15) j += 3;
+                this.tiles[j][i].classList.add(CLASS_RACK);
+                this.tiles[j+1][i].classList.add(CLASS_RACK);
+            }
+        }
+
+        const ori_x = this.w - 1;
+        const ori_y = 0;
+        this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
+
+        //this.enum_groups(ori_x, ori_y);
+        this.type_groups('a', [2,3,4,7,8,9,14]);
+        this.type_groups('b', [0,1,6]);
+        this.type_groups('c', [5,10]);
+        this.type_groups('d', [11,12,13]);
+
+        this.compute_distances(ori_x, ori_y);
     }
 
     compute_distances(ori_x, ori_y) {
@@ -201,54 +274,6 @@ class Grid {
             x.classList.remove('passed'));
     }
 
-    // scheme based on a real warehouse
-    real_scheme() {
-        this.matrix = null;
-        let i, j;
-
-        // sector 2
-        const S2_ORI = 42;
-        for (i = S2_ORI; i < S2_ORI + 32; ++i) {
-            for (j = 5; j < 63; j += 4) {
-                this.tiles[i][j].classList.add(CLASS_RACK);
-                this.tiles[i][j+1].classList.add(CLASS_RACK);
-            }
-        }
-        for (i = 2; i < 66; ++i) {
-            if (i === 32) continue;
-            // sector 1
-            this.tiles[1][i].classList.add(CLASS_RACK);
-            this.tiles[19][i].classList.add(CLASS_RACK);
-            for (j = 3; j < 39; j += 3) {
-                if (j === 18) j += 3;
-                this.tiles[j][i].classList.add(CLASS_RACK);
-                this.tiles[j+1][i].classList.add(CLASS_RACK);
-            }
-
-            // sector 3
-            const S3_ORI = 76;
-            this.tiles[S3_ORI+15][i].classList.add(CLASS_RACK);
-            this.tiles[S3_ORI+27][i].classList.add(CLASS_RACK);
-            for (j = S3_ORI; j < S3_ORI+27; j += 3) {
-                if (j === S3_ORI+15) j += 3;
-                this.tiles[j][i].classList.add(CLASS_RACK);
-                this.tiles[j+1][i].classList.add(CLASS_RACK);
-            }
-        }
-
-        const ori_x = this.w - 1;
-        const ori_y = 0;
-        this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-
-        //this.enum_groups(ori_x, ori_y);
-        this.type_groups('a', [2,3,4,7,8,9,14]);
-        this.type_groups('b', [0,1,6]);
-        this.type_groups('c', [5,10]);
-        this.type_groups('d', [11,12,13]);
-
-        this.compute_distances(ori_x, ori_y);
-    }
-
     tile_center(n) {
         return n * (this.tile_size + this.tile_margin) + (this.tile_size/2|0);
     }
@@ -269,11 +294,19 @@ class Grid {
         if (this.matrix === null) {
             this.mk_matrix();
         }
+        let matrix = this.matrix.clone();
         const [x1, y1] = from;
         const [x2, y2] = to;
-        const path = this.finder.findPath(x1, y1, x2, y2, this.matrix);
+        if (!matrix.getNode(...from).walkable) {
+            matrix.setWalkableAt(...from, true);
+        }
+        if (!matrix.getNode(...to).walkable) {
+            matrix.setWalkableAt(...from, true);
+        }
+        const path = this.finder.findPath(x1, y1, x2, y2, matrix);
         //this.paint(path, 'path');
-        return path.reverse();
+        return PF.Util.pathLength(path) - 1;
+        //return path.reverse();
     }
 
     paint(path, class_name) {
