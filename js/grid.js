@@ -297,11 +297,11 @@ class Grid {
         let matrix = this.matrix.clone();
         const [x1, y1] = from;
         const [x2, y2] = to;
-        if (!matrix.getNode(...from).walkable) {
+        if (!matrix.getNodeAt(...from).walkable) {
             matrix.setWalkableAt(...from, true);
         }
-        if (!matrix.getNode(...to).walkable) {
-            matrix.setWalkableAt(...from, true);
+        if (!matrix.getNodeAt(...to).walkable) {
+            matrix.setWalkableAt(...to, true);
         }
         const path = this.finder.findPath(x1, y1, x2, y2, matrix);
         //this.paint(path, 'path');

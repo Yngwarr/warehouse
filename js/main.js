@@ -39,28 +39,42 @@ let queue = { a: [], b: [], c: [], d: [] };
 // fill and unload
 // leaves only extras in lots
 function fill_with(lots) {
+    let res = [];
     for (let l in lots) {
         const empty = _.sortBy(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)),
             x => parseInt(x.dataset.dist, 10));
         const rs = empty.splice(0, lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to low`);
         lots[l] -= rs.length;
-        rs.forEach(r => place(r, l));
+        rs.forEach(r => {
+            const d = parseInt(r.dataset.dist, 10);
+            const x = parseInt(r.dataset.x, 10);
+            const y = parseInt(r.dataset.y, 10);
+            place(r, l);
+            res.push([d, [x, y]]);
+        });
         queue[l].push(rs.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist)));
     }
+    return res;
 }
 
 // leaves only extras in lots
-function unload_with(lots) {
+function unload_with(lots, dists) {
     let total_distance = 0;
     for (let l in lots) {
         const rs = q_take(queue[l], lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to high`);
         lots[l] -= rs.length;
-        rs.forEach(r => {
-            take(r);
-            total_distance += 2 * parseInt(r.dataset.dist);
-        });
+        const ds = dists.splice(0, rs.length);
+        for (let i = 0; i < rs.length; ++i) {
+            const dist = parseInt(rs[i].dataset.dist, 10);
+            const pt = [rs[i].dataset.x, rs[i].dataset.y].map(x => parseInt(x, 10));
+            take(rs[i]);
+            total_distance += dist + (ds[i] ? ds[i][0] + grid.path(ds[i][1], pt) : dist);
+        }
+    }
+    while (dists.length > 0) {
+        total_distance += 2 * dists.pop()[0];
     }
     return total_distance;
 }
@@ -145,8 +159,8 @@ function init() {
         objAdd(produced, supply);
         objAdd(shipped, demand);
 
-        fill_with(supply);
-        mileage += unload_with(demand);
+        const dists = fill_with(supply);
+        mileage += unload_with(demand, dists);
         update_mileage(mile_label);
         e.target.innerText = `Step (${++steps})`;
 
