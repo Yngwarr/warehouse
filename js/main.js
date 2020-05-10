@@ -82,6 +82,7 @@ function unload_with(lots, dists) {
 let grid;
 let logger;
 let ctrl;
+let stats_link;
 const daily = { a: 1072, b: 417, c: 329, d: 463 };
 
 // storage
@@ -199,6 +200,7 @@ function init() {
             objSet(supply, 0);
             objSet(demand, 0);
         }
+        stats_link.href = dataUrl(logger.csv);
         update_spans('filled', get_full());
     });
     ctrl.button('btn-heat', 'Toggle heatmap', () => {
@@ -228,7 +230,7 @@ function init() {
     }
 
     ctrl.hr();
-    logger.watch_link(ctrl.a('Download stats', dataUrl(logger.csv()), false, 'stats.csv'));
+    stats_link = ctrl.a('Download stats', dataUrl(logger.csv), false, 'stats.csv');
 
     // default values
     update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
