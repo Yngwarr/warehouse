@@ -228,7 +228,7 @@ function init() {
     }
 
     ctrl.hr();
-    logger.watch_link(ctrl.a('Download stats', dataUrl(logger.csv()), false, 'stats.txt'));
+    logger.watch_link(ctrl.a('Download stats', dataUrl(logger.csv()), false, 'stats.csv'));
 
     // default values
     update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
