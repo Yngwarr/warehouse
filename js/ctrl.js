@@ -44,6 +44,18 @@ class Ctrl {
         this.panel.appendChild(label);
         return span;
     }
+    a(text, href='javascript:void(0)', new_tab=false, download_name=null) {
+        let a = mk_elem('a');
+        a.href = href;
+        if (download_name) a.download = download_name;
+        a.innerText = text;
+        if (new_tab) {
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+        }
+        this.panel.appendChild(a);
+        return a;
+    }
     header(text) {
         let h1 = mk_elem('h1');
         h1.innerText = text;
