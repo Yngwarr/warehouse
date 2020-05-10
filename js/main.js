@@ -80,6 +80,7 @@ function unload_with(lots, dists) {
 }
 
 let grid;
+let logger;
 let ctrl;
 const daily = { a: 1072, b: 417, c: 329, d: 463 };
 
@@ -118,8 +119,20 @@ function update_spans(name, values, fn=null) {
     }
 }
 
+function get_full() {
+    return objGen(daily, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length);
+}
+
 function init() {
     grid = new Grid(document.body, 105, 68);
+    logger = new Logger((() => {
+        const keys = Object.keys(daily);
+        return ['distance'].concat(
+            keys.map(x => `produced_${x}`),
+            keys.map(x => `shipped_${x}`),
+            keys.map(x => `presented_${x}`)
+        );
+    })());
     grid.real_scheme();
     fill_with(objMap(daily, x => (x/2)|0));
 
@@ -160,7 +173,8 @@ function init() {
         objAdd(shipped, demand);
 
         const dists = fill_with(supply);
-        mileage += unload_with(demand, dists);
+        const distance = unload_with(demand, dists)
+        mileage += distance;
         update_mileage(mile_label);
         e.target.innerText = `Step (${++steps})`;
 
@@ -168,6 +182,14 @@ function init() {
         objAdd(shipped, demand, x => -x);
         update_spans('produced', produced, (a, b) => a + b);
         update_spans('shipped', shipped, (a, b) => a + b);
+
+        logger.add(objUnion(
+            { distance: distance * corridor_size },
+            objPrefix(produced, 'produced_'),
+            objPrefix(shipped, 'shipped_'),
+            objPrefix(produced, 'produced_'),
+            objPrefix(get_full(), 'presented_'),
+        ));
     };
     ctrl.button('btn-step', 'Step', e => {
         for (let i = 0; i < step_count; ++i) {
@@ -177,7 +199,7 @@ function init() {
             objSet(supply, 0);
             objSet(demand, 0);
         }
-        update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
+        update_spans('filled', get_full());
     });
     ctrl.button('btn-heat', 'Toggle heatmap', () => {
         if (grid.heatmap_on) {
@@ -204,6 +226,9 @@ function init() {
     for (let i in supply) {
         ctrl.span(`shipped-${i}`, `Lot "${i}"`, supply[i], 'pallets');
     }
+
+    ctrl.hr();
+    logger.watch_link(ctrl.a('Download stats', dataUrl(logger.csv()), false, 'stats.txt'));
 
     // default values
     update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
