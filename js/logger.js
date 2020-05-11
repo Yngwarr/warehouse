@@ -1,5 +1,5 @@
 class Logger {
-    constructor(headers, delim=',') {
+    constructor(headers, delim=';') {
         this.head = headers;
         this.data = [];
         this.delim = delim;
