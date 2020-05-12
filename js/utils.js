@@ -55,6 +55,11 @@ function objUnion(...objs) {
     return res;
 }
 
+function monthName(num) {
+    return ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+        'August', 'September', 'October', 'November', 'December'][num];
+}
+
 function dataUrl(data) {
     return `data:text/plain;base64,${btoa(data)}`;
 }

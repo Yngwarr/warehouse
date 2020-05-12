@@ -15,13 +15,19 @@ class Ctrl {
         if (this._panel_stack.length > 1) this._panel_stack.pop()
         else console.warn("one cannot simply pop the base panel")
     }
-    number(id, text, postfix=null, value=0, min=0, max=999, callback=null) {
+    number(id, text, postfix=null, value=0, min=0, max=999, step=1, callback=null) {
         return this.input(id, text, postfix, {
             type: 'number',
             min: min,
             max: max,
             value: value
-        }, callback)
+        }, callback);
+    }
+    checkbox(id, text, checked=false, callback=null) {
+        return this.input(id, text, null, {
+            type: 'checkbox',
+            checked: checked
+        }, callback);
     }
     input(id, text, postfix=null, attr={}, callback=null) {
         let label = mk_elem('label');
@@ -44,7 +50,7 @@ class Ctrl {
         this.panel.appendChild(button);
         return button;
     }
-    span(id, text, value, postfix = null) {
+    span(id, text, value, postfix=null) {
         let label = mk_elem('label');
         let span = mk_elem(`span#${id}`);
         span.innerText = value;
@@ -68,7 +74,7 @@ class Ctrl {
         this.panel.appendChild(a);
         return a;
     }
-    spoiler(header, open = false) {
+    spoiler(header, open=false) {
         let h1 = mk_elem('h1.spoiler');
         h1.dataset.open = open ? '+' : '-';
         let span = mk_elem('span.indicator');
@@ -84,7 +90,7 @@ class Ctrl {
         this.panel.appendChild(h1);
         this.panel.appendChild(div);
         this.push_panel(div);
-        return h1;
+        return div;
     }
     header(text) {
         let h1 = mk_elem('h1');

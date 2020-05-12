@@ -162,7 +162,7 @@ function init() {
 
     ctrl = new Ctrl();
     const mile_label = ctrl.span('mileage', 'Distance covered', 0, 'm');
-    ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, e => {
+    ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, 1, e => {
         corridor_size = parseFloat(e.target.value);
         update_mileage(mile_label);
     });
@@ -176,7 +176,7 @@ function init() {
     }*/
 
     ctrl.hr();
-    ctrl.number('step-ctl', 'Step =', 'hours', step_count, 1, 1000, e => {
+    ctrl.number('step-ctl', 'Step =', 'hours', step_count, 1, 1000, 1, e => {
         step_count = parseInt(e.target.value, 10);
     });
 
@@ -229,9 +229,14 @@ function init() {
     });
 
     ctrl.hr();
-    ctrl.spoiler('Seasoning');
-    ctrl.header('can you feel the rythm');
-    ctrl.input('eurobeat', '');
+    ctrl.spoiler('Seasonal adjustment', false).classList.add('seasonal');
+    ctrl.checkbox('seasonal-cb', 'Enable seasonal adjustment', season.enabled,
+        e => season.enabled = e.target.checked);
+    for (let i = 0; i < season.values.length; ++i) {
+        ctrl.number(`seasonal-${i}`, `${monthName(i)} ×`, null, season.values[i], 0, 10, 0.05, e => {
+            season.values[i] = parseFloat(e.target.value);
+        });
+    }
     ctrl.pop_panel();
 
     ctrl.hr();

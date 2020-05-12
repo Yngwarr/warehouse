@@ -63,9 +63,15 @@ a:hover {
     height: calc(100vh - 4rem);
 }
 
-.panel > * {
+.panel > *, .spoiled > * {
     display: block;
-    margin: 1rem 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.panel > * {
+    margin-left: 2rem;
+    margin-right: 2rem;
 }
 
 .panel input {
@@ -77,6 +83,11 @@ label, .panel h1, .panel a {
     font-size: 1.4rem;
     font-weight: bold;
     color: #fff;
+}
+
+.seasonal input:not([type='checkbox']){
+    float: right;
+    margin-right: 50%;
 }
 
 label > input {
