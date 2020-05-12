@@ -176,7 +176,7 @@ function init() {
     }*/
 
     ctrl.hr();
-    ctrl.number('step-ctl', 'Step = ', 'hours', step_count, 1, 1000, e => {
+    ctrl.number('step-ctl', 'Step =', 'hours', step_count, 1, 1000, e => {
         step_count = parseInt(e.target.value, 10);
     });
 
@@ -229,7 +229,10 @@ function init() {
     });
 
     ctrl.hr();
-    ctrl.spoiler('Seasoning', 'ass');
+    ctrl.spoiler('Seasoning');
+    ctrl.header('can you feel the rythm');
+    ctrl.input('eurobeat', '');
+    ctrl.pop_panel();
 
     ctrl.hr();
     ctrl.header('Now presented');

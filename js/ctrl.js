@@ -1,9 +1,19 @@
 class Ctrl {
     constructor() {
-        this.panel = mk_elem('.panel');
+        this._panel_stack = [mk_elem('.panel')];
         document.querySelector('body').appendChild(this.panel);
         this.SPOILER_OPEN = '▽';
         this.SPOILER_CLOSED = '▷';
+    }
+    get panel() {
+        return _.last(this._panel_stack);
+    }
+    push_panel(div) {
+        this._panel_stack.push(div);
+    }
+    pop_panel() {
+        if (this._panel_stack.length > 1) this._panel_stack.pop()
+        else console.warn("one cannot simply pop the base panel")
     }
     number(id, text, postfix=null, value=0, min=0, max=999, callback=null) {
         return this.input(id, text, postfix, {
@@ -16,7 +26,7 @@ class Ctrl {
     input(id, text, postfix=null, attr={}, callback=null) {
         let label = mk_elem('label');
         let input = mk_elem(`input#${id}`, null, {attr: attr});
-        label.appendChild(document.createTextNode(text + ' '));
+        label.appendChild(document.createTextNode(text));
         label.appendChild(input);
         if (postfix) {
             label.appendChild(document.createTextNode(' ' + postfix));
@@ -58,14 +68,13 @@ class Ctrl {
         this.panel.appendChild(a);
         return a;
     }
-    spoiler(header, inner, open = false) {
+    spoiler(header, open = false) {
         let h1 = mk_elem('h1.spoiler');
         h1.dataset.open = open ? '+' : '-';
         let span = mk_elem('span.indicator');
         span.innerText = open ? this.SPOILER_OPEN : this.SPOILER_CLOSED;
         h1.appendChild(span);
         let div = mk_elem('.spoiled');
-        div.innerHTML = inner;
         h1.appendChild(document.createTextNode(` ${header}`));
         h1.addEventListener('click', () => {
             h1.dataset.open = h1.dataset.open === '+' ? '-' : '+';
@@ -74,6 +83,7 @@ class Ctrl {
         })
         this.panel.appendChild(h1);
         this.panel.appendChild(div);
+        this.push_panel(div);
         return h1;
     }
     header(text) {
