@@ -21,6 +21,14 @@ function objAdd(a, b, fn=null) {
     return a;
 }
 
+function objMul(obj, scalar) {
+    let res = {};
+    for (let i in obj) {
+        res[i] = obj[i] * scalar;
+    }
+    return res;
+}
+
 function objSet(obj, n) {
     for (let i in obj) {
         obj[i] = n;

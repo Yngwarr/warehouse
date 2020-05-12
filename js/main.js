@@ -84,6 +84,11 @@ let logger;
 let ctrl;
 let stats_link;
 const daily = { a: 1072, b: 417, c: 329, d: 463 };
+let season = {
+    enabled: false,
+    values: [1, 1, 1, 1.1, 1.25, 1.5, 1.5, 1.5, 1, 1, 1, 1],
+    bounds: [744, 1416, 2160, 2880, 3624, 4344, 5088, 5832, 6552, 7296, 8016, 8760]
+};
 
 // storage
 let supply = { a: 0, b: 0, c: 0, d: 0 };
@@ -95,9 +100,11 @@ let over_demand = { a: 0, b: 0, c: 0, d: 0 };
 let distrib = { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
 
 let round_down = true;
-function compute_hourly_io() {
-    for (let i in daily) {
-        supply[i] += ((daily[i] / HOURS_PER_DAY)|0) + (round_down ? 1 : 0);
+function compute_hourly_io(hour) {
+    console.log(`season coef: ${get_season_coef(hour)}`);
+    const seasoned = objMul(daily, get_season_coef(hour));
+    for (let i in seasoned) {
+        supply[i] += ((seasoned[i] / HOURS_PER_DAY)|0) + (round_down ? 1 : 0);
         const a = (2/3)*supply[i];
         const b = (4/3)*supply[i];
         demand[i] += ((a + (b - a) * jStat.beta.sample(...distrib[i]))|0) + (round_down ? 0 : 1);
@@ -106,6 +113,16 @@ function compute_hourly_io() {
     console.log(JSON.stringify(supply))
     console.log(JSON.stringify(demand))
     console.log('--------')
+}
+
+function get_season_coef(h) {
+    if (!season.enabled) return 1;
+    const yh = h % _.last(season.bounds);
+    if (yh < 0) throw `hour can't be negative (got ${h} -> ${yh})`;
+    for (let i = 0; i < season.bounds.length; ++i) {
+        if (yh < season.bounds[i]) return season.values[i];
+    }
+    throw `${yh} % ${_.last(season.bounds)} = ${yh} >= ${_.last(season.bounds)}. WTF?`;
 }
 
 function update_spans(name, values, fn=null) {
@@ -168,8 +185,8 @@ function init() {
         if (grid.heatmap_on) grid.hide_heatmap();
 
         let produced = objGen(supply, () => 0);
-        let shipped = objGen(supply, () => 0);
-        compute_hourly_io();
+        let shipped = objGen(demand, () => 0);
+        compute_hourly_io(steps);
         objAdd(produced, supply);
         objAdd(shipped, demand);
 
