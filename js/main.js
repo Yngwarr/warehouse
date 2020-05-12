@@ -85,7 +85,7 @@ let ctrl;
 let stats_link;
 const daily = { a: 1072, b: 417, c: 329, d: 463 };
 let season = {
-    enabled: false,
+    enabled: true,
     values: [1, 1, 1, 1.1, 1.25, 1.5, 1.5, 1.5, 1, 1, 1, 1],
     bounds: [744, 1416, 2160, 2880, 3624, 4344, 5088, 5832, 6552, 7296, 8016, 8760]
 };
@@ -205,7 +205,6 @@ function init() {
             { distance: distance * corridor_size },
             objPrefix(produced, 'produced_'),
             objPrefix(shipped, 'shipped_'),
-            objPrefix(produced, 'produced_'),
             objPrefix(get_full(), 'presented_'),
         ));
     };
