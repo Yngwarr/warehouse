@@ -2,6 +2,8 @@ class Ctrl {
     constructor() {
         this.panel = mk_elem('.panel');
         document.querySelector('body').appendChild(this.panel);
+        this.SPOILER_OPEN = '▽';
+        this.SPOILER_CLOSED = '▷';
     }
     number(id, text, postfix=null, value=0, min=0, max=999, callback=null) {
         return this.input(id, text, postfix, {
@@ -55,6 +57,24 @@ class Ctrl {
         }
         this.panel.appendChild(a);
         return a;
+    }
+    spoiler(header, inner, open = false) {
+        let h1 = mk_elem('h1.spoiler');
+        h1.dataset.open = open ? '+' : '-';
+        let span = mk_elem('span.indicator');
+        span.innerText = open ? this.SPOILER_OPEN : this.SPOILER_CLOSED;
+        h1.appendChild(span);
+        let div = mk_elem('.spoiled');
+        div.innerHTML = inner;
+        h1.appendChild(document.createTextNode(` ${header}`));
+        h1.addEventListener('click', () => {
+            h1.dataset.open = h1.dataset.open === '+' ? '-' : '+';
+            const o = h1.dataset.open === '+';
+            span.innerText = o ? this.SPOILER_OPEN : this.SPOILER_CLOSED;
+        })
+        this.panel.appendChild(h1);
+        this.panel.appendChild(div);
+        return h1;
     }
     header(text) {
         let h1 = mk_elem('h1');

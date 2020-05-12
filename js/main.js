@@ -229,6 +229,9 @@ function init() {
     });
 
     ctrl.hr();
+    ctrl.spoiler('Seasoning', 'ass');
+
+    ctrl.hr();
     ctrl.header('Now presented');
     for (let i in supply) {
         ctrl.span(`filled-${i}`, `Lot "${i}"`, supply[i], 'pallets');
