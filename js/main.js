@@ -149,9 +149,16 @@ function get_full() {
 }
 
 function show_scheme_choice() {
+    const url = new URL(location.href);
+    const schm = url.searchParams.get('scheme');
+
     const root = location.href.split('?')[0];
     grid.schemes.forEach(x => {
-        ctrl.a(`${uni('bullet')} ${grid.scheme_name(x)}`, `${root}?scheme=${x}`);
+        if (x === schm) {
+            ctrl.label(`${uni('bullet')} ${grid.scheme_name(x)} (current)`);
+        } else {
+            ctrl.a(`${uni('bullet')} ${grid.scheme_name(x)}`, `${root}?scheme=${x}`);
+        }
     });
 }
 

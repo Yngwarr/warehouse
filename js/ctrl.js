@@ -63,6 +63,12 @@ class Ctrl {
         this.panel.appendChild(label);
         return span;
     }
+    label(text) {
+        let label = mk_elem('label');
+        label.innerText = text;
+        this.panel.appendChild(label);
+        return label;
+    }
     a(text, href='javascript:void(0)', new_tab=false, download_name=null) {
         let a = mk_elem('a');
         a.href = href;
