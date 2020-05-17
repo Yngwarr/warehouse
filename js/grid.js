@@ -168,10 +168,10 @@ class Grid {
         this.matrix = null;
         let i, j;
         for (i = 2; i < this.w - 2; ++i) {
+            if ([(this.w / 2)|0, ((this.w / 2)|0)+1].includes(i)) continue;
             for (j = 2; j < this.h - 2; j += 3) {
-                if (i === (this.h / 2)|0) break;
                 this.tiles[i][j].classList.add(CLASS_RACK);
-                this.tiles[i+1][j].classList.add(CLASS_RACK);
+                this.tiles[i][j+1].classList.add(CLASS_RACK);
             }
         }
 

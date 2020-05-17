@@ -54,7 +54,7 @@ class Ctrl {
     span(id, text, value, postfix=null) {
         let label = mk_elem('label');
         let span = mk_elem(`span#${id}`);
-        span.innerText = value;
+        span.innerText = `${value}`;
         label.appendChild(document.createTextNode(text + ': '));
         label.appendChild(span);
         if (postfix) {

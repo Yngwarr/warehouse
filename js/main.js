@@ -88,6 +88,8 @@ let logger;
 let ctrl;
 let stats_link;
 const daily = { a: 1072, b: 417, c: 329, d: 463 };
+const critical = objMap(daily, x => (x/4)|0);
+const CRIT_MULT = 1.1;
 let season = {
     enabled: true,
     values: [1, 1, 1, 1.1, 1.25, 1.5, 1.5, 1.5, 1, 1, 1, 1],
@@ -113,6 +115,12 @@ function compute_hourly_io(hour) {
         const b = (4/3)*supply[i];
         demand[i] += ((a + (b - a) * jStat.beta.sample(...distrib[i]))|0)
             + (round_down ? 0 : 1);
+    }
+    for (let i in critical) {
+        if (document.querySelectorAll(`.full[data-lot=${i}]`).length < critical[i]) {
+            supply[i] *= CRIT_MULT;
+            console.log('panic!');
+        }
     }
     round_down = !round_down;
     console.log(JSON.stringify(supply))
@@ -254,6 +262,7 @@ function init() {
     });
 
     ctrl.hr();
+    ctrl.span('racks-num', 'Number of racks', document.querySelectorAll('.rack').length);
     ctrl.spoiler('Change scheme', false);
     show_scheme_choice();
     ctrl.pop_panel();
