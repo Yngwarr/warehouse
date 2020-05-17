@@ -85,6 +85,15 @@ class Grid {
 
     get g_w() { return Math.ceil(this.w / this.group_size); }
     get g_h() { return Math.ceil(this.h / this.group_size); }
+    get schemes() { return ['plain', 'horiz', 'real'] }
+    scheme_name(id) {
+        switch (id) {
+            case 'plain': return 'vertical';
+            case 'horiz': return 'horizontal';
+            case 'real': return 'combined';
+            default: return id;
+        }
+    }
 
     group_number(x, y) {
         const gs = this.group_size;
@@ -99,7 +108,8 @@ class Grid {
         const y = ori / gw | 0;
         for (let i = 0; i < gh; ++i) {
             for (let j = 0; j < gw; ++j) {
-                this.groups[i*gw + j].dataset.d = Math.abs(y*gw + j - ori) + Math.abs(i - y);
+                this.groups[i*gw + j].dataset.d = Math.abs(y*gw + j - ori)
+                    + Math.abs(i - y);
             }
         }
     }

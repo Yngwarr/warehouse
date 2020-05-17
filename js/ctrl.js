@@ -2,8 +2,8 @@ class Ctrl {
     constructor() {
         this._panel_stack = [mk_elem('.panel')];
         document.querySelector('body').appendChild(this.panel);
-        this.SPOILER_OPEN = '▽';
-        this.SPOILER_CLOSED = '▷';
+        this.SPOILER_OPEN = uni('tri_down');
+        this.SPOILER_CLOSED = uni('tri_right');
     }
     get panel() {
         return _.last(this._panel_stack);
@@ -15,7 +15,8 @@ class Ctrl {
         if (this._panel_stack.length > 1) this._panel_stack.pop()
         else console.warn("one cannot simply pop the base panel")
     }
-    number(id, text, postfix=null, value=0, min=0, max=999, step=1, callback=null) {
+    number(id, text, postfix=null, value=0, min=0, max=999, step=1,
+        callback=null) {
         return this.input(id, text, postfix, {
             type: 'number',
             min: min,

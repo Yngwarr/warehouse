@@ -41,7 +41,8 @@ let queue = { a: [], b: [], c: [], d: [] };
 function fill_with(lots) {
     let res = [];
     for (let l in lots) {
-        const empty = _.sortBy(Array.from(document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)),
+        const empty = _.sortBy(Array.from(
+            document.querySelectorAll(`.rack[data-type="${l}"]:not(.full)`)),
             x => parseInt(x.dataset.dist, 10));
         const rs = empty.splice(0, lots[l]);
         if (rs.length < lots[l]) console.warn(`${l} demand to low`);
@@ -53,7 +54,8 @@ function fill_with(lots) {
             place(r, l);
             res.push([d, [x, y]]);
         });
-        queue[l].push(rs.sort((a, b) => parseInt(a.dataset.dist) - parseInt(b.dataset.dist)));
+        queue[l].push(rs.sort((a, b) => parseInt(a.dataset.dist)
+            - parseInt(b.dataset.dist)));
     }
     return res;
 }
@@ -68,9 +70,11 @@ function unload_with(lots, dists) {
         const ds = dists.splice(0, rs.length);
         for (let i = 0; i < rs.length; ++i) {
             const dist = parseInt(rs[i].dataset.dist, 10);
-            const pt = [rs[i].dataset.x, rs[i].dataset.y].map(x => parseInt(x, 10));
+            const pt = [rs[i].dataset.x, rs[i].dataset.y]
+                .map(x => parseInt(x, 10));
             take(rs[i]);
-            total_distance += dist + (ds[i] ? ds[i][0] + grid.path(ds[i][1], pt) : dist);
+            total_distance += dist + (ds[i]
+                ? ds[i][0] + grid.path(ds[i][1], pt) : dist);
         }
     }
     while (dists.length > 0) {
@@ -107,7 +111,8 @@ function compute_hourly_io(hour) {
         supply[i] += ((seasoned[i] / HOURS_PER_DAY)|0) + (round_down ? 1 : 0);
         const a = (2/3)*supply[i];
         const b = (4/3)*supply[i];
-        demand[i] += ((a + (b - a) * jStat.beta.sample(...distrib[i]))|0) + (round_down ? 0 : 1);
+        demand[i] += ((a + (b - a) * jStat.beta.sample(...distrib[i]))|0)
+            + (round_down ? 0 : 1);
     }
     round_down = !round_down;
     console.log(JSON.stringify(supply))
@@ -122,7 +127,8 @@ function get_season_coef(h) {
     for (let i = 0; i < season.bounds.length; ++i) {
         if (yh < season.bounds[i]) return season.values[i];
     }
-    throw `${yh} % ${_.last(season.bounds)} = ${yh} >= ${_.last(season.bounds)}. WTF?`;
+    throw `${yh} % ${_.last(season.bounds)} = ${yh} >= ${_.last(season.bounds)}.`
+        + ' What?';
 }
 
 function update_spans(name, values, fn=null) {
@@ -138,11 +144,31 @@ function update_spans(name, values, fn=null) {
 }
 
 function get_full() {
-    return objGen(daily, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length);
+    return objGen(daily,
+        i => document.querySelectorAll(`.full[data-lot="${i}"]`).length);
+}
+
+function show_scheme_choice() {
+    const root = location.href.split('?')[0];
+    grid.schemes.forEach(x => {
+        ctrl.a(`${uni('bullet')} ${grid.scheme_name(x)}`, `${root}?scheme=${x}`);
+    });
 }
 
 function init() {
     grid = new Grid(document.body, 105, 68);
+    ctrl = new Ctrl();
+
+    const url = new URL(location.href);
+    const schm = url.searchParams.get('scheme');
+    if (grid.schemes.includes(schm)) {
+        grid[`${schm}_scheme`]();
+    } else {
+        ctrl.header('Choose a scheme');
+        show_scheme_choice();
+        return;
+    }
+
     logger = new Logger((() => {
         const keys = Object.keys(daily);
         return ['distance'].concat(
@@ -151,7 +177,7 @@ function init() {
             keys.map(x => `presented_${x}`)
         );
     })());
-    grid.real_scheme();
+
     fill_with(objMap(daily, x => (x/2)|0));
 
     let mileage = 0;
@@ -160,20 +186,13 @@ function init() {
 
     const update_mileage = span => span.innerText = mileage * corridor_size;
 
-    ctrl = new Ctrl();
     const mile_label = ctrl.span('mileage', 'Distance covered', 0, 'm');
-    ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, 1, e => {
-        corridor_size = parseFloat(e.target.value);
-        update_mileage(mile_label);
-    });
-
-    /*ctrl.hr();
-    ctrl.header('Supply');
-    for (let i in supply) {
-        ctrl.number(`import-${i}`, `Lot "${i}"`, null, supply[i], 0, 999, e =>{
-            supply[i] = parseInt(e.target.value, 10);
-        });
-    }*/
+    ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, 1,
+        e => {
+            corridor_size = parseFloat(e.target.value);
+            update_mileage(mile_label);
+        }
+    );
 
     ctrl.hr();
     ctrl.number('step-ctl', 'Step =', 'hours', step_count, 1, 1000, 1, e => {
@@ -228,13 +247,19 @@ function init() {
     });
 
     ctrl.hr();
+    ctrl.spoiler('Change scheme', false);
+    show_scheme_choice();
+    ctrl.pop_panel();
+
+    ctrl.hr();
     ctrl.spoiler('Seasonal adjustment', false).classList.add('seasonal');
     ctrl.checkbox('seasonal-cb', 'Enable seasonal adjustment', season.enabled,
         e => season.enabled = e.target.checked);
     for (let i = 0; i < season.values.length; ++i) {
-        ctrl.number(`seasonal-${i}`, `${monthName(i)} ×`, null, season.values[i], 0, 10, 0.05, e => {
-            season.values[i] = parseFloat(e.target.value);
-        });
+        ctrl.number(`seasonal-${i}`, `${monthName(i)} ×`, null, season.values[i],
+            0, 10, 0.05, e => {
+                season.values[i] = parseFloat(e.target.value);
+            });
     }
     ctrl.pop_panel();
 
@@ -260,5 +285,6 @@ function init() {
     stats_link = ctrl.a('Download stats', dataUrl(logger.csv), false, 'stats.csv');
 
     // default values
-    update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
+    update_spans('filled', objGen(supply,
+        i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
 }

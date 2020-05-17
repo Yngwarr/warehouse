@@ -37,15 +37,6 @@ h1.spoiler {
     display: block;
 }
 
-a {
-    color: #fff;
-    /*text-decoration: none;*/
-}
-
-a:hover {
-    text-shadow: 2px 2px #888;
-}
-
 #grid {
     background: #2d2d2d;
 }
@@ -78,6 +69,15 @@ a:hover {
 .panel input {
     display: inline-block;
     margin-left: 1rem;
+}
+
+.panel a {
+    color: #fff;
+    /*text-decoration: none;*/
+}
+
+.panel a:hover {
+    text-shadow: 2px 2px #888;
 }
 
 label, .panel h1, .panel a {
@@ -135,3 +135,20 @@ input[type=number]::-webkit-outer-spin-button {
 #grid rect.heat-5 { fill: #fc7400 }
 #grid rect.heat-6 { fill: #fc3000 }
 #grid rect.heat-7 { fill: #980000 }
+
+/* ======== [SCHEME CHOICE] ======== */
+
+#wrapper {
+    position: absolute;
+    top: 2rem;
+    left: 1rem;
+    /*width: 100vw;
+    height: 100vh;*/
+}
+
+#wrapper a, #wrapper h1 {
+    color: #fff;
+    display: block;
+    font-size: 2.4rem;
+    margin: 2rem;
+}
