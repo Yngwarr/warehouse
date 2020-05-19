@@ -143,10 +143,15 @@ class Grid {
         this.matrix = null;
         let i, j;
         for (i = 2; i < this.h - 2; ++i) {
-            this.tiles[0][i].classList.add(CLASS_RACK);
-            this.tiles[this.w - 1][i].classList.add(CLASS_RACK);
+            //this.tiles[0][i].classList.add(CLASS_RACK);
+            //this.tiles[this.w - 1][i].classList.add(CLASS_RACK);
+            if ([(this.h/2)|0, ((this.h/2)|0)+1,
+                (this.h/4)|0, ((this.h/4)|0)+1,
+                (this.h*.75)|0, ((this.h*.75)|0)+1].includes(i)) continue;
             for (j = 2; j < this.w - 2; j += 3) {
-                if (i === (this.h / 2)|0) break;
+                if ([(this.w/2)|0, ((this.w/2)|0)+1,
+                    (this.w/4)|0, ((this.w/4)|0)+1,
+                    80, 81].includes(j)) continue;
                 this.tiles[j][i].classList.add(CLASS_RACK);
                 this.tiles[j+1][i].classList.add(CLASS_RACK);
             }
@@ -167,9 +172,13 @@ class Grid {
     horiz_scheme() {
         this.matrix = null;
         let i, j;
-        for (i = 2; i < this.w - 2; ++i) {
-            if ([(this.w / 2)|0, ((this.w / 2)|0)+1].includes(i)) continue;
-            for (j = 2; j < this.h - 2; j += 3) {
+        for (i = 3; i < this.w - 2; ++i) {
+            if ([((this.w/2)|0)+1, (this.w/2)|0,
+                ((this.w/2)|0)+2, ((this.w/2)|0)-1,
+                ((this.w/4)|0)+1, (this.w/4)|0,
+                ((this.w*.75)|0)+1, (this.w*.75)|0].includes(i)) continue;
+            for (j = 2; j < this.h - 5; j += 3) {
+                if ([((this.h/2)|0)-2].includes(j)) continue;
                 this.tiles[i][j].classList.add(CLASS_RACK);
                 this.tiles[i][j+1].classList.add(CLASS_RACK);
             }
