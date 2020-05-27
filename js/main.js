@@ -184,6 +184,16 @@ function init() {
         return;
     }
 
+    /*document.querySelectorAll('rect').forEach(x => {
+        x.addEventListener('click', e => {
+            if (x.classList.contains('rack')) {
+                x.classList.remove('rack');
+            } else {
+                x.classList.add('rack');
+            }
+        })
+    });*/
+
     logger = new Logger((() => {
         const keys = Object.keys(daily);
         return ['distance'].concat(

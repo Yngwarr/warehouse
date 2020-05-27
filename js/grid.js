@@ -85,12 +85,13 @@ class Grid {
 
     get g_w() { return Math.ceil(this.w / this.group_size); }
     get g_h() { return Math.ceil(this.h / this.group_size); }
-    get schemes() { return ['plain', 'horiz', 'real'] }
+    get schemes() { return ['plain', 'horiz', 'real', 'flyingv'] }
     scheme_name(id) {
         switch (id) {
             case 'plain': return 'vertical';
             case 'horiz': return 'horizontal';
             case 'real': return 'combined';
+            case 'flyingv': return 'Flying V';
             default: return id;
         }
     }
@@ -154,6 +155,50 @@ class Grid {
                     80, 81].includes(j)) continue;
                 this.tiles[j][i].classList.add(CLASS_RACK);
                 this.tiles[j+1][i].classList.add(CLASS_RACK);
+            }
+        }
+
+        const ori_x = this.w - 1;
+        const ori_y = 0;
+        this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
+
+        this.type_groups('a', [2,3,4,7,8,9,14]);
+        this.type_groups('b', [0,1,6]);
+        this.type_groups('c', [5,10]);
+        this.type_groups('d', [11,12,13]);
+
+        this.compute_distances(ori_x, ori_y);
+    }
+
+    flyingv_scheme() {
+        this.matrix = null;
+        let i, j;
+        for (i = 3; i < this.h - 4; ++i) {
+            for (j = 2; j < this.w - 2; j += 3) {
+                if ([(this.w/2)|0, ((this.w/2)|0)+1,
+                    (this.w/4)|0, ((this.w/4)|0)+1,
+                    80, 81].includes(j)) continue;
+                this.tiles[j][i].classList.add(CLASS_RACK);
+                this.tiles[j+1][i].classList.add(CLASS_RACK);
+            }
+        }
+
+        {
+            let x = 3;
+            let y = 2;
+            let i = 0;
+            const rm = (a, b) => this.tiles[a][b].classList.remove(CLASS_RACK);
+            const rx = a => this.w - a;
+            while (x < this.w && y < this.h) {
+                [[rx(x), y], [rx(x+1), y],
+                [rx(x), y+1], [rx(x+1), y+1],
+                [rx(x), y+2], [rx(x+1), y+2]].forEach(xs => rm(...xs));
+                x += 3;
+                if (x < this.w / 2) {
+                    y += i++ % 3 === 0 ? 1 : 2;
+                } else {
+                    y += i++ % 3 !== 0 ? 1 : 2;
+                }
             }
         }
 
