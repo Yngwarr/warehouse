@@ -47,7 +47,9 @@ class Grid {
         this.w = w;
         this.h = h;
         this.matrix = null;
-        this.finder = new PF.AStarFinder();
+        this.finder = new PF.AStarFinder({
+            diagonalMovement: PF.DiagonalMovement.OnlyWhenNoObstacles
+        });
         this.heatmap_on = false;
 
         let grid = mk_elem('svg#grid', SVG_NS, { attr: {
@@ -195,7 +197,7 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.compute_distances(ori_x, ori_y);
+        this.accurate_distances(ori_x, ori_y);
     }
 
     // scheme based on a real warehouse
@@ -243,7 +245,7 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.compute_distances(ori_x, ori_y);
+        this.accurate_distances(ori_x, ori_y);
     }
 
     flyingv_scheme() {
@@ -287,7 +289,7 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.compute_distances(ori_x, ori_y);
+        this.accurate_distances(ori_x, ori_y);
     }
 
     fishbone_scheme() {
@@ -297,24 +299,32 @@ class Grid {
         const rx = a => this.w - a;
         // vertical racks
         for (j = 2; j < this.w - 2; j += 3) {
-            for (i = 2; i < Math.min(((j*ratio)|0) - 1, this.h - 2); ++i) {
+            const bound = Math.min(((j*ratio)|0) - 1, this.h - 2);
+            for (i = 2; i < bound; ++i) {
                 if ([(this.w/2)|0, ((this.w/2)|0)+1,
                     (this.w/4)|0, ((this.w/4)|0)+1,
                     80, 81].includes(j)) continue;
                 this.tiles[rx(j)][i].classList.add(CLASS_RACK);
                 this.tiles[rx(j+1)][i].classList.add(CLASS_RACK);
             }
+            //if (bound !== 0) {
+                //this.tiles[rx(j)][bound-1].classList.remove(CLASS_RACK);
+            //}
         }
 
         // horizontal racks
         for (j = 2; j < this.h - 2; j += 3) {
-            for (i = 2; i < Math.min(((j*(1/ratio))|0) - 1, this.w - 2); ++i) {
+            const bound = Math.min(((j*(1/ratio))|0) - 1, this.w - 2);
+            for (i = 2; i < bound; ++i) {
                 if ([(this.h/2)|0, ((this.h/2)|0)+1,
                     (this.h/4)|0, ((this.h/4)|0)+1,
                     53, 54].includes(j)) continue;
                 this.tiles[rx(i)][j].classList.add(CLASS_RACK);
                 this.tiles[rx(i)][j+1].classList.add(CLASS_RACK);
             }
+            //if (bound !== 0) {
+                //this.tiles[rx(bound-1)][j].classList.remove(CLASS_RACK);
+            //}
         }
 
         const ori_x = this.w - 1;
@@ -326,7 +336,7 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.compute_distances(ori_x, ori_y);
+        this.accurate_distances(ori_x, ori_y);
     }
 
     compute_distances(ori_x, ori_y) {
@@ -376,6 +386,12 @@ class Grid {
 
         document.querySelectorAll('.passed').forEach(x =>
             x.classList.remove('passed'));
+    }
+
+    accurate_distances(ori_x, ori_y) {
+        document.querySelectorAll('.rack').forEach(x =>
+            x.dataset.dist = grid.path([grid.w - 1, 0],
+                [parseInt(x.dataset.x), parseInt(x.dataset.y)]))
     }
 
     tile_center(n) {

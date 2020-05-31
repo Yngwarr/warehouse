@@ -209,7 +209,7 @@ function init() {
     let corridor_size = 1;
     let step_count = 1;
 
-    const update_mileage = span => span.innerText = mileage * corridor_size;
+    const update_mileage = span => span.innerText = Math.round(mileage * corridor_size);
 
     const mile_label = ctrl.span('mileage', 'Distance covered', 0, 'm');
     ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, 1,
