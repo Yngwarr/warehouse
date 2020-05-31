@@ -290,6 +290,20 @@ function init() {
     ctrl.pop_panel();
 
     ctrl.hr();
+    ctrl.spoiler('Distribution parameters');
+    for (let i in distrib) {
+        ctrl.number(`distrib-${i}-0`, `Lot ${i} ${uni('alpha')}`, null,
+            distrib[i][0], 0, 10, 0.1, e => {
+                distrib[i][0] = parseFloat(e.target.value);
+            });
+        ctrl.number(`distrib-${i}-1`, `Lot ${i} ${uni('beta')}`, null,
+            distrib[i][1], 0, 10, 0.1, e => {
+                distrib[i][1] = parseFloat(e.target.value);
+            });
+    }
+    ctrl.pop_panel();
+
+    ctrl.hr();
     ctrl.header('Now presented');
     for (let i in supply) {
         ctrl.span(`filled-${i}`, `Lot "${i}"`, supply[i], 'pallets');
