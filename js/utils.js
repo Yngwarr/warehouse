@@ -55,6 +55,10 @@ function objUnion(...objs) {
     return res;
 }
 
+function objClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 function monthName(num) {
     return ['January', 'February', 'March', 'April', 'May', 'June', 'July',
         'August', 'September', 'October', 'November', 'December'][num];

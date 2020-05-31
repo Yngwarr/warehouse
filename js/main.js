@@ -87,8 +87,8 @@ let grid;
 let logger;
 let ctrl;
 let stats_link;
-const daily = { a: 1072, b: 417, c: 329, d: 463 };
-const critical = objMap(daily, x => (x/4)|0);
+let daily = { a: 1072, b: 417, c: 329, d: 463 };
+let critical = objMap(daily, x => (x/4)|0);
 const CRIT_MULT = 1.1;
 let season = {
     enabled: true,
@@ -203,7 +203,10 @@ function init() {
         );
     })());
 
-    fill_with(objMap(daily, x => (x/2)|0));
+    const initial_fill = d => {
+        fill_with(objMap(d, x => (x/2)|0));
+    };
+    initial_fill(daily);
 
     let mileage = 0;
     let corridor_size = 1;
@@ -275,6 +278,28 @@ function init() {
     ctrl.span('racks-num', 'Number of racks', document.querySelectorAll('.rack').length);
     ctrl.spoiler('Change scheme', false);
     show_scheme_choice();
+    ctrl.pop_panel();
+
+
+    const update_daily = new_daily => {
+        if (steps === 0) {
+            unload_with(objMap(daily, x => (x/2)|0), []);
+            initial_fill(new_daily);
+        }
+        critical = objMap(new_daily, x => (x/4)|0);
+        daily = new_daily;
+    }
+
+    ctrl.hr();
+    ctrl.spoiler('Daily supply', false);
+    for (let i in daily) {
+        ctrl.number(`daily-${i}`, `Lot ${i}`, 'pallets', daily[i],
+            0, 100000, 5, e => {
+                const new_daily = objClone(daily);
+                new_daily[i] = parseInt(e.target.value, 10);
+                update_daily(new_daily);
+            });
+    }
     ctrl.pop_panel();
 
     ctrl.hr();
