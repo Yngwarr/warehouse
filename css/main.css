@@ -83,7 +83,7 @@ label, .panel h1, .panel a {
 
 .seasonal input:not([type='checkbox']){
     float: right;
-    margin-right: 50%;
+    margin-right: 30%;
 }
 
 label > input {
