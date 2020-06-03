@@ -104,42 +104,12 @@ class Grid {
         return (y / gs | 0) * this.g_w + (x / gs | 0);
     }
 
-    enum_groups(_x, _y) {
-        const gw = (this.w / this.group_size | 0) + 1;
-        const gh = (this.h / this.group_size | 0) + 1;
-        const ori = this.group_number(_x, _y);
-        const x = ori % gw;
-        const y = ori / gw | 0;
-        for (let i = 0; i < gh; ++i) {
-            for (let j = 0; j < gw; ++j) {
-                this.groups[i*gw + j].dataset.d = Math.abs(y*gw + j - ori)
-                    + Math.abs(i - y);
-            }
-        }
-    }
-
     type_groups(type, gnums) {
         for (let i = 0; i < gnums.length; ++i) {
             this.groups[gnums[i]].querySelectorAll('.rack').forEach(x => {
                 x.dataset.type = type;
             });
         }
-    }
-
-    neighbor_groups(n) {
-        let res = [];
-        const hor = [n - 1, n + 1];
-        const vert = [n - this.g_w, n + this.g_w];
-        for (let i = 0; i < hor.length; ++i) {
-            // are on one line with n
-            if (hor[i] >= 0 && ((hor[i] / this.g_w)|0) === ((n / this.g_w)|0)) {
-                res.push(hor[i]);
-            }
-            if (vert[i] >= 0 && vert[i] < this.groups.length) {
-                res.push(vert[i]);
-            }
-        }
-        return res;
     }
 
     // schemes: (1) spawn racks, (2) compute distances
@@ -197,7 +167,7 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.accurate_distances(ori_x, ori_y);
+        this.compute_distances(ori_x, ori_y);
     }
 
     // scheme based on a real warehouse
@@ -239,13 +209,12 @@ class Grid {
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
 
-        //this.enum_groups(ori_x, ori_y);
         this.type_groups('a', [2,3,4,7,8,9,14]);
         this.type_groups('b', [0,1,6]);
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.accurate_distances(ori_x, ori_y);
+        this.compute_distances(ori_x, ori_y);
     }
 
     flyingv_scheme() {
@@ -289,7 +258,7 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.accurate_distances(ori_x, ori_y);
+        this.compute_distances(ori_x, ori_y);
     }
 
     fishbone_scheme() {
@@ -336,59 +305,10 @@ class Grid {
         this.type_groups('c', [5,10]);
         this.type_groups('d', [11,12,13]);
 
-        this.accurate_distances(ori_x, ori_y);
+        this.compute_distances(ori_x, ori_y);
     }
 
     compute_distances(ori_x, ori_y) {
-        let path = [[ori_x, ori_y]];
-        let new_path = [];
-        let count = 0;
-        const same_or_passed = ([x, y], pth) => {
-            return this.tiles[x][y].classList.contains('passed')
-                || pth.filter(([px, py]) => px === x && py === y).length > 0;
-        };
-
-        while (path.length > 0) {
-            for (let i = 0; i < path.length; ++i) {
-                const [x, y] = path[i];
-                if (this.tiles[x][y].classList.contains(CLASS_RACK)) {
-                    this.tiles[x][y].dataset.dist = count;
-                }
-                this.tiles[x][y].classList.add('passed');
-
-                // add the neighborhood to a new path
-                let z;
-                if ((z = x + 1) < this.w) {
-                    if (!same_or_passed([z, y], new_path)) {
-                        new_path.push([z, y]);
-                    }
-                }
-                if ((z = x - 1) >= 0) {
-                    if (!same_or_passed([z, y], new_path)) {
-                        new_path.push([z, y]);
-                    }
-                }
-                if ((z = y + 1) < this.h) {
-                    if (!same_or_passed([x, z], new_path)) {
-                        new_path.push([x, z]);
-                    }
-                }
-                if ((z = y - 1) >= 0) {
-                    if (!same_or_passed([x, z], new_path)) {
-                        new_path.push([x, z]);
-                    }
-                }
-            }
-            path = new_path;
-            new_path = [];
-            ++count;
-        }
-
-        document.querySelectorAll('.passed').forEach(x =>
-            x.classList.remove('passed'));
-    }
-
-    accurate_distances(ori_x, ori_y) {
         document.querySelectorAll('.rack').forEach(x =>
             x.dataset.dist = grid.path([grid.w - 1, 0],
                 [parseInt(x.dataset.x), parseInt(x.dataset.y)]))
@@ -435,20 +355,6 @@ class Grid {
             this.tiles[x][y].setAttribute('class', '');
             this.tiles[x][y].classList.add('path');
         }
-    }
-
-    nearest(sel, x, y) {
-        let gs = [this.group_number(x, y)];
-        let passed = [];
-        while (gs.length > 0) {
-            let g = gs.pop();
-            let cs = document.querySelectorAll(`g[data-n="${g}"] ${sel}`);
-            // TODO return the closest of all
-            if (cs.length > 0) return cs[0];
-            passed.push(g);
-            gs = gs + _.difference(this.neighbor_groups(g), passed, gs);
-        }
-        return null;
     }
 
     show_heatmap() {
