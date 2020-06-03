@@ -1,5 +1,5 @@
 const EMPTY = '_';
-const HOURS_PER_DAY = 24;
+let HOURS_PER_DAY = 24;
 
 function place(where, lot) {
     where.classList.add('full');
@@ -292,6 +292,9 @@ function init() {
 
     ctrl.hr();
     ctrl.spoiler('Daily supply', false);
+    ctrl.number(`hpd`, 'Hours per day', null, HOURS_PER_DAY, 1, 24, 1, e => {
+        HOURS_PER_DAY = parseInt(e.target.value, 10);
+    });
     for (let i in daily) {
         ctrl.number(`daily-${i}`, `Lot ${i}`, 'pallets', daily[i],
             0, 100000, 5, e => {
