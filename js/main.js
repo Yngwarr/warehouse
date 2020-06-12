@@ -1,5 +1,5 @@
 const EMPTY = '_';
-let HOURS_PER_DAY = 24;
+let HOURS_PER_DAY = retrieve('hpd') || 24;
 
 function place(where, lot) {
     where.classList.add('full');
@@ -87,12 +87,14 @@ let grid;
 let logger;
 let ctrl;
 let stats_link;
-let daily = { a: 1072, b: 417, c: 329, d: 463 };
+let daily = objRetr(retrieve('d'), 'abcd', 0)
+    || { a: 1072, b: 417, c: 329, d: 463 };
 let critical = objMap(daily, x => (x/4)|0);
 const CRIT_MULT = 1.1;
 let season = {
     enabled: true,
-    values: [1, 1, 1, 1.1, 1.25, 1.5, 1.5, 1.5, 1, 1, 1, 1],
+    values: arrRetr(retrieve('sv'), 12, 1)
+        || [1, 1, 1, 1.1, 1.25, 1.5, 1.5, 1.5, 1, 1, 1, 1],
     bounds: [744, 1416, 2160, 2880, 3624, 4344, 5088, 5832, 6552, 7296, 8016, 8760]
 };
 
@@ -103,7 +105,8 @@ let demand = { a: 0, b: 0, c: 0, d: 0 };
 let over_supply = { a: 0, b: 0, c: 0, d: 0 };
 let over_demand = { a: 0, b: 0, c: 0, d: 0 };
 
-let distrib = { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
+let distrib = objRetr(retrieve('dist'), 'abcd', [1, 1])
+    || { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
 
 let round_down = true;
 function compute_hourly_io(hour) {
@@ -209,8 +212,8 @@ function init() {
     initial_fill(daily);
 
     let mileage = 0;
-    let corridor_size = 1;
-    let step_count = 1;
+    let corridor_size = retrieve('cs') || 1;
+    let step_count = retrieve('ss') || 1;
 
     const update_mileage = span => span.innerText = Math.round(mileage * corridor_size);
 
@@ -218,6 +221,7 @@ function init() {
     ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, 1,
         e => {
             corridor_size = parseFloat(e.target.value);
+            store('cs', corridor_size);
             update_mileage(mile_label);
         }
     );
@@ -225,6 +229,7 @@ function init() {
     ctrl.hr();
     ctrl.number('step-ctl', 'Step =', 'hours', step_count, 1, 1000, 1, e => {
         step_count = parseInt(e.target.value, 10);
+        store('ss', step_count);
     });
 
     let steps = 0;
@@ -294,6 +299,7 @@ function init() {
     ctrl.spoiler('Daily supply', false);
     ctrl.number(`hpd`, 'Hours per day', null, HOURS_PER_DAY, 1, 24, 1, e => {
         HOURS_PER_DAY = parseInt(e.target.value, 10);
+        store('hpd', HOURS_PER_DAY);
     });
     for (let i in daily) {
         ctrl.number(`daily-${i}`, `Lot ${i}`, 'pallets', daily[i],
@@ -301,6 +307,7 @@ function init() {
                 const new_daily = objClone(daily);
                 new_daily[i] = parseInt(e.target.value, 10);
                 update_daily(new_daily);
+                store('d', new_daily);
             });
     }
     ctrl.pop_panel();
@@ -313,6 +320,7 @@ function init() {
         ctrl.number(`seasonal-${i}`, `${monthName(i)} ×`, null, season.values[i],
             0, 10, 0.05, e => {
                 season.values[i] = parseFloat(e.target.value);
+                store('sv', season.values);
             });
     }
     ctrl.pop_panel();
@@ -323,10 +331,12 @@ function init() {
         ctrl.number(`distrib-${i}-0`, `Lot ${i} ${uni('alpha')}`, null,
             distrib[i][0], 0, 10, 0.1, e => {
                 distrib[i][0] = parseFloat(e.target.value);
+                store('dist', distrib);
             });
         ctrl.number(`distrib-${i}-1`, `Lot ${i} ${uni('beta')}`, null,
             distrib[i][1], 0, 10, 0.1, e => {
                 distrib[i][1] = parseFloat(e.target.value);
+                store('dist', distrib);
             });
     }
     ctrl.pop_panel();

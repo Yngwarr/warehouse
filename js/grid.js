@@ -314,10 +314,6 @@ class Grid {
                 [parseInt(x.dataset.x), parseInt(x.dataset.y)]))
     }
 
-    tile_center(n) {
-        return n * (this.tile_size + this.tile_margin) + (this.tile_size/2|0);
-    }
-
     mk_matrix() {
         let matrix = [];
         for (let y = 0; y < this.h; ++y) {
