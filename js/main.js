@@ -7,8 +7,9 @@ function place(where, lot) {
 }
 
 function take(from) {
-    const heat = parseInt(from.dataset.heat) || 0;
-    from.dataset.heat = heat + 1;
+    const heat = (parseInt(from.dataset.heat) || 0) + 1;
+    from.dataset.heat = heat;
+    if (grid.max_heat < heat) grid.max_heat = heat;
     const lot = from.dataset.lot;
     from.dataset.lot = EMPTY;
     from.classList.remove('full');
@@ -87,6 +88,7 @@ let grid;
 let logger;
 let ctrl;
 let stats_link;
+let heatmap_link;
 let daily = objRetr(retrieve('d'), 'abcd', 0)
     || { a: 1072, b: 417, c: 329, d: 463 };
 let critical = objMap(daily, x => (x/4)|0);
@@ -269,6 +271,7 @@ function init() {
             objSet(demand, 0);
         }
         stats_link.href = dataUrl(logger.csv);
+        heatmap_link.href = dataUrl(grid.export_heatmap());
         update_spans('filled', get_full());
     });
     ctrl.button('btn-heat', 'Toggle heatmap', () => {
@@ -361,6 +364,7 @@ function init() {
 
     ctrl.hr();
     stats_link = ctrl.a('Download stats', dataUrl(logger.csv), false, 'stats.csv');
+    heatmap_link = ctrl.a('Download heatmap', dataUrl(grid.export_heatmap()), false, 'heat.csv');
 
     // default values
     update_spans('filled', objGen(supply,

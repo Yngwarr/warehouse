@@ -4,7 +4,7 @@ const CLASS_RACK = 'rack';
 const CLASS_LOAD = 'load-zone';
 const CLASS_UNLOAD = 'unload-zone';
 
-const MAX_HEAT = 7;
+const MAX_HEAT_LVL= 7;
 
 function slice_to_char(str, from, to) {
     const indices = to.map(s => str.indexOf(s)).filter(i => i > -1);
@@ -51,6 +51,7 @@ class Grid {
             diagonalMovement: PF.DiagonalMovement.OnlyWhenNoObstacles
         });
         this.heatmap_on = false;
+        this.max_heat = 0;
 
         let grid = mk_elem('svg#grid', SVG_NS, { attr: {
             width: (this.tile_size + this.tile_margin) * w,
@@ -359,7 +360,7 @@ class Grid {
             let heat_class;
             heat_class = 0;
             if (heat > 0) heat_class = 1;
-            for (let i = 2; i <= MAX_HEAT; ++i) {
+            for (let i = 2; i <= MAX_HEAT_LVL; ++i) {
                 if (heat >= 5*(i-1)) heat_class = i;
             }
             r.classList.add(`heat-${heat_class}`);
@@ -374,5 +375,23 @@ class Grid {
             });
         }
         this.heatmap_on = false;
+    }
+
+    export_heatmap() {
+        const tiles = this.tiles;
+        let csv = '';
+        for (let j = 0; j < tiles[0].length; ++j) {
+            for (let i = 0; i < tiles.length; ++i) {
+                if (!tiles[i][j].classList.contains(CLASS_RACK)) {
+                    csv += ` ${CSV_DELIM}`;
+                    continue;
+                }
+                const heat = tiles[i][j].dataset.heat;
+                csv += heat || 0;
+                csv += CSV_DELIM;
+            }
+            csv += '\n';
+        }
+        return csv;
     }
 }

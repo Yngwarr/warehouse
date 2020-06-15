@@ -1,5 +1,7 @@
+const CSV_DELIM = ';';
+
 class Logger {
-    constructor(headers, delim=';') {
+    constructor(headers, delim=CSV_DELIM) {
         this.head = headers;
         this.data = [];
         this.delim = delim;
