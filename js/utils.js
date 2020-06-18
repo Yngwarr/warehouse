@@ -99,3 +99,20 @@ function retrieve(key) {
 function store(key, value) {
     localStorage.setItem(key, JSON.stringify(value))
 }
+
+/* -------- */
+
+function feGrid() {
+    grid.tiles.forEach((l, y) => l.forEach((r, x) => {
+        if (f(x, y)) {
+            r.classList.add(CLASS_RACK);
+        } else {
+            r.classList.remove(CLASS_RACK);
+        }
+    }))
+}
+
+function clearGrid() {
+    document.querySelectorAll('.rack').forEach(e => take(e));
+    feGrid(() => false);
+}
