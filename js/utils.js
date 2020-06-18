@@ -102,7 +102,7 @@ function store(key, value) {
 
 /* -------- */
 
-function feGrid() {
+function feGrid(f) {
     grid.tiles.forEach((l, y) => l.forEach((r, x) => {
         if (f(x, y)) {
             r.classList.add(CLASS_RACK);
