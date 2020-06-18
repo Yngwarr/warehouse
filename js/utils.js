@@ -118,7 +118,7 @@ function feGrid(f) {
 }
 
 function clearGrid() {
-    ORIGIN_X = grid.w - 1;
+    ORIGIN_X = grid.w - 2;
     ORIGIN_Y = 0;
     document.querySelectorAll('.rack').forEach(e => take(e));
     feGrid(() => false);
