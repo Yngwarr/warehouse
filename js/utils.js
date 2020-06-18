@@ -102,8 +102,8 @@ function store(key, value) {
 
 /* -------- */
 
-var ORIGIN_X = grid.w - 1;
-var ORIGIN_Y = 0;
+let ORIGIN_X;
+let ORIGIN_Y;
 function feGrid(f) {
     grid.tiles.forEach((l, x) => l.forEach((r, y) => {
         if (x === ORIGIN_X && y === ORIGIN_Y) {
@@ -118,6 +118,8 @@ function feGrid(f) {
 }
 
 function clearGrid() {
+    ORIGIN_X = grid.w - 1;
+    ORIGIN_Y = 0;
     document.querySelectorAll('.rack').forEach(e => take(e));
     feGrid(() => false);
 }
