@@ -102,9 +102,11 @@ function store(key, value) {
 
 /* -------- */
 
+let ORIGIN_X = grid.w - 1;
+let ORIGIN_Y = 0;
 function feGrid(f) {
     grid.tiles.forEach((l, x) => l.forEach((r, y) => {
-        if (f(x, y)) {
+        if (f(x, y, grid.w, grid.h, ORIGIN_X, ORIGIN_Y)) {
             r.classList.add(CLASS_RACK);
         } else {
             r.classList.remove(CLASS_RACK);
