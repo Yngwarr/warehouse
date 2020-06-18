@@ -102,8 +102,8 @@ function store(key, value) {
 
 /* -------- */
 
-let ORIGIN_X = grid.w - 1;
-let ORIGIN_Y = 0;
+var ORIGIN_X = grid.w - 1;
+var ORIGIN_Y = 0;
 function feGrid(f) {
     grid.tiles.forEach((l, x) => l.forEach((r, y) => {
         if (x === ORIGIN_X && y === ORIGIN_Y) {
