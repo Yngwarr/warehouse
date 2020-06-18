@@ -106,6 +106,9 @@ let ORIGIN_X = grid.w - 1;
 let ORIGIN_Y = 0;
 function feGrid(f) {
     grid.tiles.forEach((l, x) => l.forEach((r, y) => {
+        if (x === ORIGIN_X && y === ORIGIN_Y) {
+            r.classList.add('unload');
+        }
         if (f(x, y, grid.w, grid.h, ORIGIN_X, ORIGIN_Y)) {
             r.classList.add(CLASS_RACK);
         } else {
