@@ -119,7 +119,7 @@ function feGrid(f) {
 
 function feColor(f) {
     grid.tiles.forEach((l, x) => l.forEach((r, y) => {
-        r.dataset.type = f(x, y, grid.w, grid.h, ORIGIN_X, ORIGIN_Y);
+        r.dataset.type = 'abcd'[f(x, y, grid.w, grid.h, ORIGIN_X, ORIGIN_Y)];
     }))
 }
 
