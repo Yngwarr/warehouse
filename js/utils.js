@@ -117,6 +117,12 @@ function feGrid(f) {
     }))
 }
 
+function feColor(f) {
+    grid.tiles.forEach((l, x) => l.forEach((r, y) => {
+        r.dataset.type = f(x, y, grid.w, grid.h, ORIGIN_X, ORIGIN_Y);
+    }))
+}
+
 function clearGrid() {
     ORIGIN_X = grid.w - 2;
     ORIGIN_Y = 0;
