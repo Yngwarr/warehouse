@@ -1,15 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.init = void 0;
-const unicode_1 = require("./unicode");
-const logger_1 = require("./logger");
-const ctrl_1 = require("./ctrl");
-const grid_1 = require("./grid");
-const _ = require("3rd/underscore");
-const jStat = require("3rd/jstat");
-const Utils = require("./utils");
+// @ts-ignore
 const EMPTY = '_';
-let HOURS_PER_DAY = Utils.retrieve('hpd') || 24;
+let HOURS_PER_DAY = retrieve('hpd') || 24;
 function place(where, lot) {
     where.classList.add('full');
     where.dataset.lot = lot;
@@ -95,13 +86,13 @@ let logger;
 let ctrl;
 let stats_link;
 let heatmap_link;
-let daily = Utils.objRetr(Utils.retrieve('d'), 'abcd', 0)
+let daily = objRetr(retrieve('d'), 'abcd', 0)
     || { a: 1072, b: 417, c: 329, d: 463 };
-let critical = Utils.objMap(daily, x => (x / 4) | 0);
+let critical = objMap(daily, x => (x / 4) | 0);
 const CRIT_MULT = 1.1;
 let season = {
     enabled: true,
-    values: Utils.arrRetr(Utils.retrieve('sv'), 12, 1)
+    values: arrRetr(retrieve('sv'), 12, 1)
         || [1, 1, 1, 1.1, 1.25, 1.5, 1.5, 1.5, 1, 1, 1, 1],
     bounds: [744, 1416, 2160, 2880, 3624, 4344, 5088, 5832, 6552, 7296, 8016, 8760]
 };
@@ -111,12 +102,12 @@ let demand = { a: 0, b: 0, c: 0, d: 0 };
 // stats on low or high supplies
 let over_supply = { a: 0, b: 0, c: 0, d: 0 };
 let over_demand = { a: 0, b: 0, c: 0, d: 0 };
-let distrib = Utils.objRetr(Utils.retrieve('dist'), 'abcd', [1, 1])
+let distrib = objRetr(retrieve('dist'), 'abcd', [1, 1])
     || { a: [2, 2], b: [3, 3], c: [4, 4], d: [5, 5] };
 let round_down = true;
 function compute_hourly_io(hour) {
     console.log(`season coef: ${get_season_coef(hour)}`);
-    const seasoned = Utils.objMul(daily, get_season_coef(hour));
+    const seasoned = objMul(daily, get_season_coef(hour));
     for (let i in seasoned) {
         supply[i] += ((seasoned[i] / HOURS_PER_DAY) | 0) + (round_down ? 1 : 0);
         const a = (2 / 3) * supply[i];
@@ -131,8 +122,8 @@ function compute_hourly_io(hour) {
         }
     }
     round_down = !round_down;
-    console.log(JSON.stringify(supply));
-    console.log(JSON.stringify(demand));
+    console.log(str(supply));
+    console.log(str(demand));
     console.log('--------');
 }
 function get_season_coef(h) {
@@ -161,7 +152,7 @@ function update_spans(name, values, fn = null) {
     }
 }
 function get_full() {
-    return Utils.objGen(daily, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length);
+    return objGen(daily, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length);
 }
 function show_scheme_choice() {
     const url = new URL(location.href);
@@ -169,16 +160,16 @@ function show_scheme_choice() {
     const root = location.href.split('?')[0];
     grid.schemes.forEach(x => {
         if (x === schm) {
-            ctrl.label(`${unicode_1.uni('bullet')} ${grid.scheme_name(x)} (current)`);
+            ctrl.label(`${uni('bullet')} ${grid.scheme_name(x)} (current)`);
         }
         else {
-            ctrl.a(`${unicode_1.uni('bullet')} ${grid.scheme_name(x)}`, `${root}?scheme=${x}`);
+            ctrl.a(`${uni('bullet')} ${grid.scheme_name(x)}`, `${root}?scheme=${x}`);
         }
     });
 }
 function init() {
-    grid = new grid_1.Grid(document.body, 105, 68);
-    ctrl = new ctrl_1.Ctrl();
+    grid = new Grid(document.body, 105, 68);
+    ctrl = new Ctrl();
     const url = new URL(location.href);
     const schm = url.searchParams.get('scheme');
     if (grid.schemes.includes(schm)) {
@@ -198,59 +189,59 @@ function init() {
             }
         })
     });*/
-    logger = new logger_1.Logger((() => {
+    logger = new Logger((() => {
         const keys = Object.keys(daily);
         return ['distance'].concat(keys.map(x => `produced_${x}`), keys.map(x => `shipped_${x}`), keys.map(x => `presented_${x}`));
     })());
     const initial_fill = (d) => {
-        fill_with(Utils.objMap(d, x => (x / 2) | 0));
+        fill_with(objMap(d, x => (x / 2) | 0));
     };
     initial_fill(daily);
     let mileage = 0;
-    let corridor_size = Utils.retrieve('cs') || 1;
-    let step_count = Utils.retrieve('ss') || 1;
+    let corridor_size = retrieve('cs') || 1;
+    let step_count = retrieve('ss') || 1;
     const update_mileage = (span) => span.innerText = Math.round(mileage * corridor_size).toString();
     const mile_label = ctrl.span('mileage', 'Distance covered', 0, 'm');
     ctrl.number('in-corridor-size', 'Corridor size', 'm', corridor_size, 0, 100, 1, e => {
         corridor_size = parseFloat(e.target.value);
-        Utils.store('cs', corridor_size);
+        store('cs', corridor_size);
         update_mileage(mile_label);
     });
     ctrl.hr();
     ctrl.number('step-ctl', 'Step =', 'hours', step_count, 1, 1000, 1, e => {
         step_count = parseInt(e.target.value, 10);
-        Utils.store('ss', step_count);
+        store('ss', step_count);
     });
     let steps = 0;
     let step = (e) => {
         if (grid.heatmap_on)
             grid.hide_heatmap();
-        let produced = Utils.objSet(supply, 0);
-        let shipped = Utils.objSet(demand, 0);
+        let produced = objGen(supply, () => 0);
+        let shipped = objGen(demand, () => 0);
         compute_hourly_io(steps);
-        Utils.objAdd(produced, supply);
-        Utils.objAdd(shipped, demand);
+        objAdd(produced, supply);
+        objAdd(shipped, demand);
         const dists = fill_with(supply);
         const distance = unload_with(demand, dists);
         mileage += distance;
         update_mileage(mile_label);
         e.target.innerText = `Step (${++steps})`;
-        Utils.objAdd(produced, supply, x => -x);
-        Utils.objAdd(shipped, demand, x => -x);
+        objAdd(produced, supply, x => -x);
+        objAdd(shipped, demand, x => -x);
         update_spans('produced', produced, (a, b) => a + b);
         update_spans('shipped', shipped, (a, b) => a + b);
-        logger.add(Utils.objUnion({ distance: distance * corridor_size }, Utils.objPrefix(produced, 'produced_'), Utils.objPrefix(shipped, 'shipped_'), Utils.objPrefix(get_full(), 'presented_')));
+        logger.add(objUnion({ distance: distance * corridor_size }, objPrefix(produced, 'produced_'), objPrefix(shipped, 'shipped_'), objPrefix(get_full(), 'presented_')));
     };
     ctrl.button('btn-step', 'Step', e => {
         for (let i = 0; i < step_count; ++i) {
             step(e);
-            Utils.objAdd(over_supply, supply);
-            Utils.objAdd(over_demand, demand);
-            Utils.objSet(supply, 0);
-            Utils.objSet(demand, 0);
+            objAdd(over_supply, supply);
+            objAdd(over_demand, demand);
+            objSet(supply, 0);
+            objSet(demand, 0);
         }
-        stats_link.href = Utils.dataUrl(logger.csv);
-        heatmap_link.href = Utils.dataUrl(grid.export_heatmap());
+        stats_link.href = dataUrl(logger.csv);
+        heatmap_link.href = dataUrl(grid.export_heatmap());
         update_spans('filled', get_full());
     });
     ctrl.button('btn-heat', 'Toggle heatmap', () => {
@@ -268,24 +259,24 @@ function init() {
     ctrl.pop_panel();
     const update_daily = (new_daily) => {
         if (steps === 0) {
-            unload_with(Utils.objMap(daily, x => (x / 2) | 0), []);
+            unload_with(objMap(daily, x => (x / 2) | 0), []);
             initial_fill(new_daily);
         }
-        critical = Utils.objMap(new_daily, x => (x / 4) | 0);
+        critical = objMap(new_daily, x => (x / 4) | 0);
         daily = new_daily;
     };
     ctrl.hr();
     ctrl.spoiler('Daily supply', false);
     ctrl.number(`hpd`, 'Hours per day', null, HOURS_PER_DAY, 1, 24, 1, e => {
         HOURS_PER_DAY = parseInt(e.target.value, 10);
-        Utils.store('hpd', HOURS_PER_DAY);
+        store('hpd', HOURS_PER_DAY);
     });
     for (let i in daily) {
         ctrl.number(`daily-${i}`, `Lot ${i}`, 'pallets', daily[i], 0, 100000, 5, e => {
-            const new_daily = Utils.objClone(daily);
+            const new_daily = objClone(daily);
             new_daily[i] = parseInt(e.target.value, 10);
             update_daily(new_daily);
-            Utils.store('d', new_daily);
+            store('d', new_daily);
         });
     }
     ctrl.pop_panel();
@@ -293,22 +284,22 @@ function init() {
     ctrl.spoiler('Seasonal adjustment', false).classList.add('seasonal');
     ctrl.checkbox('seasonal-cb', 'Enable seasonal adjustment', season.enabled, e => season.enabled = e.target.checked);
     for (let i = 0; i < season.values.length; ++i) {
-        ctrl.number(`seasonal-${i}`, `${Utils.monthName(i)} ×`, null, season.values[i], 0, 10, 0.05, e => {
+        ctrl.number(`seasonal-${i}`, `${monthName(i)} ×`, null, season.values[i], 0, 10, 0.05, e => {
             season.values[i] = parseFloat(e.target.value);
-            Utils.store('sv', season.values);
+            store('sv', season.values);
         });
     }
     ctrl.pop_panel();
     ctrl.hr();
     ctrl.spoiler('Distribution parameters');
     for (let i in distrib) {
-        ctrl.number(`distrib-${i}-0`, `Lot ${i} ${unicode_1.uni('alpha')}`, null, distrib[i][0], 0, 10, 0.1, e => {
+        ctrl.number(`distrib-${i}-0`, `Lot ${i} ${uni('alpha')}`, null, distrib[i][0], 0, 10, 0.1, e => {
             distrib[i][0] = parseFloat(e.target.value);
-            Utils.store('dist', distrib);
+            store('dist', distrib);
         });
-        ctrl.number(`distrib-${i}-1`, `Lot ${i} ${unicode_1.uni('beta')}`, null, distrib[i][1], 0, 10, 0.1, e => {
+        ctrl.number(`distrib-${i}-1`, `Lot ${i} ${uni('beta')}`, null, distrib[i][1], 0, 10, 0.1, e => {
             distrib[i][1] = parseFloat(e.target.value);
-            Utils.store('dist', distrib);
+            store('dist', distrib);
         });
     }
     ctrl.pop_panel();
@@ -328,9 +319,8 @@ function init() {
         ctrl.span(`shipped-${i}`, `Lot "${i}"`, supply[i], 'pallets');
     }
     ctrl.hr();
-    stats_link = ctrl.a('Download stats', Utils.dataUrl(logger.csv), false, 'stats.csv');
-    heatmap_link = ctrl.a('Download heatmap', Utils.dataUrl(grid.export_heatmap()), false, 'heat.csv');
+    stats_link = ctrl.a('Download stats', dataUrl(logger.csv), false, 'stats.csv');
+    heatmap_link = ctrl.a('Download heatmap', dataUrl(grid.export_heatmap()), false, 'heat.csv');
     // default values
-    update_spans('filled', Utils.objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
+    update_spans('filled', objGen(supply, i => document.querySelectorAll(`.full[data-lot="${i}"]`).length));
 }
-exports.init = init;

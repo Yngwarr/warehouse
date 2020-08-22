@@ -1,4 +1,3 @@
-"use strict";
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
     if (!privateMap.has(receiver)) {
         throw new TypeError("attempted to set private field on non-instance");
@@ -13,17 +12,12 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return privateMap.get(receiver);
 };
 var _panel_stack;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Ctrl = void 0;
-const _ = require("3rd/underscore");
-const unicode_1 = require("./unicode");
-const grid_1 = require("./grid");
 class Ctrl {
     constructor() {
         _panel_stack.set(this, void 0);
-        this.SPOILER_OPEN = unicode_1.uni('tri_down');
-        this.SPOILER_CLOSED = unicode_1.uni('tri_right');
-        __classPrivateFieldSet(this, _panel_stack, [grid_1.mk_elem('.panel')]);
+        this.SPOILER_OPEN = uni('tri_down');
+        this.SPOILER_CLOSED = uni('tri_right');
+        __classPrivateFieldSet(this, _panel_stack, [mk_elem('.panel')]);
         document.querySelector('body').appendChild(this.panel);
     }
     get panel() {
@@ -54,8 +48,8 @@ class Ctrl {
         }, callback);
     }
     input(id, text, postfix = null, attr = {}, callback = null) {
-        let label = grid_1.mk_elem('label');
-        let input = grid_1.mk_elem(`input#${id}`, null, { attr: attr });
+        let label = mk_elem('label');
+        let input = mk_elem(`input#${id}`, null, { attr: attr });
         label.appendChild(document.createTextNode(text));
         label.appendChild(input);
         if (postfix) {
@@ -68,15 +62,15 @@ class Ctrl {
         return input;
     }
     button(id, text, callback) {
-        let button = grid_1.mk_elem(`button#${id}`);
+        let button = mk_elem(`button#${id}`);
         button.appendChild(document.createTextNode(text));
         button.addEventListener('click', callback);
         this.panel.appendChild(button);
         return button;
     }
     span(id, text, value, postfix = null) {
-        let label = grid_1.mk_elem('label');
-        let span = grid_1.mk_elem(`span#${id}`);
+        let label = mk_elem('label');
+        let span = mk_elem(`span#${id}`);
         span.innerText = `${value}`;
         label.appendChild(document.createTextNode(text + ': '));
         label.appendChild(span);
@@ -87,13 +81,13 @@ class Ctrl {
         return span;
     }
     label(text) {
-        let label = grid_1.mk_elem('label');
+        let label = mk_elem('label');
         label.innerText = text;
         this.panel.appendChild(label);
         return label;
     }
     a(text, href = 'javascript:void(0)', new_tab = false, download_name = null) {
-        let a = grid_1.mk_elem('a');
+        let a = mk_elem('a');
         a.href = href;
         if (download_name)
             a.download = download_name;
@@ -106,12 +100,12 @@ class Ctrl {
         return a;
     }
     spoiler(header, open = false) {
-        let h1 = grid_1.mk_elem('h1.spoiler');
+        let h1 = mk_elem('h1.spoiler');
         h1.dataset.open = open ? '+' : '-';
-        let span = grid_1.mk_elem('span.indicator');
+        let span = mk_elem('span.indicator');
         span.innerText = open ? this.SPOILER_OPEN : this.SPOILER_CLOSED;
         h1.appendChild(span);
-        let div = grid_1.mk_elem('.spoiled');
+        let div = mk_elem('.spoiled');
         h1.appendChild(document.createTextNode(` ${header}`));
         h1.addEventListener('click', () => {
             h1.dataset.open = h1.dataset.open === '+' ? '-' : '+';
@@ -124,16 +118,15 @@ class Ctrl {
         return div;
     }
     header(text) {
-        let h1 = grid_1.mk_elem('h1');
+        let h1 = mk_elem('h1');
         h1.innerText = text;
         this.panel.appendChild(h1);
         return h1;
     }
     hr() {
-        let hr = grid_1.mk_elem('hr');
+        let hr = mk_elem('hr');
         this.panel.appendChild(hr);
         return hr;
     }
 }
-exports.Ctrl = Ctrl;
 _panel_stack = new WeakMap();

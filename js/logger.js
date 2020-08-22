@@ -1,4 +1,3 @@
-"use strict";
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
     if (!privateMap.has(receiver)) {
         throw new TypeError("attempted to set private field on non-instance");
@@ -13,11 +12,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return privateMap.get(receiver);
 };
 var _csv;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logger = exports.CSV_DELIM = void 0;
-exports.CSV_DELIM = ';';
+const CSV_DELIM = ';';
 class Logger {
-    constructor(headers, delim = exports.CSV_DELIM) {
+    constructor(headers, delim = CSV_DELIM) {
         _csv.set(this, void 0);
         this.data = [];
         this.head = headers;
@@ -47,5 +44,4 @@ class Logger {
         return __classPrivateFieldGet(this, _csv);
     }
 }
-exports.Logger = Logger;
 _csv = new WeakMap();

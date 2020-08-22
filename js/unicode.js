@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.uni = void 0;
 function uni(name) {
     switch (name) {
         case 'tri_down': return '▽';
@@ -10,4 +7,3 @@ function uni(name) {
         case 'beta': return '𝛽';
     }
 }
-exports.uni = uni;

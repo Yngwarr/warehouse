@@ -1,8 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Grid = exports.mk_elem = void 0;
-const PF = require("3rd/pathfinding");
-const logger_1 = require("./logger");
+// @ts-ignore
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CLASS_RACK = 'rack';
 const CLASS_LOAD = 'load-zone';
@@ -40,7 +36,6 @@ function mk_elem(sel, ns = null, params = { attr: {}, data: {}, style: {} }) {
         el.style[s] = style[s];
     return el;
 }
-exports.mk_elem = mk_elem;
 class Grid {
     constructor(root, w, h) {
         this.tile_size = 7;
@@ -238,7 +233,7 @@ class Grid {
             let y = 2;
             let i = 0;
             const rm = (a, b) => this.tiles[a][b].classList.remove(CLASS_RACK);
-            const rx = a => this.w - a;
+            const rx = (a) => this.w - a;
             while (x < this.w && y < this.h) {
                 [[rx(x), y], [rx(x + 1), y],
                     [rx(x), y + 1], [rx(x + 1), y + 1],
@@ -374,16 +369,15 @@ class Grid {
         for (let j = 0; j < tiles[0].length; ++j) {
             for (let i = 0; i < tiles.length; ++i) {
                 if (!tiles[i][j].classList.contains(CLASS_RACK)) {
-                    csv += ` ${logger_1.CSV_DELIM}`;
+                    csv += ` ${CSV_DELIM}`;
                     continue;
                 }
                 const heat = tiles[i][j].dataset.heat;
                 csv += heat || 0;
-                csv += logger_1.CSV_DELIM;
+                csv += CSV_DELIM;
             }
             csv += '\n';
         }
         return csv;
     }
 }
-exports.Grid = Grid;
