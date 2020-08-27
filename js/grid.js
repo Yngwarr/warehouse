@@ -40,9 +40,6 @@ class Grid {
     constructor(root, w, h) {
         this.tile_size = 7;
         this.tile_margin = 1;
-        // carefully picked
-        this.group_size = 24;
-        this.groups = [];
         this.tiles = [];
         this.matrix = null;
         this.heatmap_on = false;
@@ -56,12 +53,6 @@ class Grid {
                 width: (this.tile_size + this.tile_margin) * w,
                 height: (this.tile_size + this.tile_margin) * h
             } });
-        const group_num = this.group_number(w - 1, h - 1);
-        for (let i = 0; i <= group_num; ++i) {
-            const g = mk_elem('g', SVG_NS, { data: { n: i } });
-            this.groups.push(g);
-            grid.appendChild(g);
-        }
         for (let c = 0; c < w; ++c) {
             let column = [];
             for (let r = 0; r < h; ++r) {
@@ -75,15 +66,13 @@ class Grid {
                     data: { x: c, y: r }
                 });
                 column.push(rect);
-                this.groups[this.group_number(c, r)].appendChild(rect);
+                grid.appendChild(rect);
             }
             this.tiles.push(column);
         }
         root.appendChild(grid);
         this.grid = grid;
     }
-    get g_w() { return Math.ceil(this.w / this.group_size); }
-    get g_h() { return Math.ceil(this.h / this.group_size); }
     // TODO get rid of this thing
     get schemes() { return ['plain', 'horiz', 'real', 'flyingv', 'fishbone']; }
     scheme_name(id) {
@@ -94,19 +83,6 @@ class Grid {
             case 'flyingv': return 'Flying V';
             case 'fishbone': return 'Fishbone Aisles';
             default: return id;
-        }
-    }
-    group_number(x, y) {
-        const gs = this.group_size;
-        return (y / gs | 0) * this.g_w + (x / gs | 0);
-    }
-    /** @deprecated
-    * assigns specified type to groups of racks */
-    type_groups(type, gnums) {
-        for (let i = 0; i < gnums.length; ++i) {
-            this.groups[gnums[i]].querySelectorAll('.rack').forEach((x) => {
-                x.dataset.type = type;
-            });
         }
     }
     /** @deprecated
@@ -134,10 +110,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.type_groups('a', [2, 3, 4, 7, 8, 9, 14]);
-        this.type_groups('b', [0, 1, 6]);
-        this.type_groups('c', [5, 10]);
-        this.type_groups('d', [11, 12, 13]);
+        this.default_colors([ori_x, ori_y]);
         this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated */
@@ -161,10 +134,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.type_groups('a', [2, 3, 4, 7, 8, 9, 14]);
-        this.type_groups('b', [0, 1, 6]);
-        this.type_groups('c', [5, 10]);
-        this.type_groups('d', [11, 12, 13]);
+        this.default_colors([ori_x, ori_y]);
         this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated
@@ -207,10 +177,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.type_groups('a', [2, 3, 4, 7, 8, 9, 14]);
-        this.type_groups('b', [0, 1, 6]);
-        this.type_groups('c', [5, 10]);
-        this.type_groups('d', [11, 12, 13]);
+        this.default_colors([ori_x, ori_y]);
         this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated */
@@ -250,10 +217,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.type_groups('a', [2, 3, 4, 7, 8, 9, 14]);
-        this.type_groups('b', [0, 1, 6]);
-        this.type_groups('c', [5, 10]);
-        this.type_groups('d', [11, 12, 13]);
+        this.default_colors([ori_x, ori_y]);
         this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated */
@@ -296,11 +260,25 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.type_groups('a', [2, 3, 4, 7, 8, 9, 14]);
-        this.type_groups('b', [0, 1, 6]);
-        this.type_groups('c', [5, 10]);
-        this.type_groups('d', [11, 12, 13]);
+        this.default_colors([ori_x, ori_y]);
         this.compute_distances(ori_x, ori_y);
+    }
+    /** @deprecated
+    * a temporary function for setting colors up */
+    default_colors(ori) {
+        this.setup_colors((as) => {
+            const { pos, size } = as;
+            const half_w = (size[0] / 2) | 0;
+            const half_h = (size[1] / 2) | 0;
+            if (pos[0] < half_w && pos[1] < half_h)
+                return 'b';
+            else if (pos[0] >= half_w && pos[1] < half_h)
+                return 'a';
+            else if (pos[0] >= half_w && pos[1] >= half_h)
+                return 'd';
+            else if (pos[0] < half_w && pos[1] >= half_h)
+                return 'c';
+        }, ori);
     }
     compute_distances(ori_x, ori_y) {
         document.querySelectorAll('.rack').forEach((x) => x.dataset.dist = this.path([ori_x, ori_y], [parseInt(x.dataset.x), parseInt(x.dataset.y)]).toString());
@@ -379,5 +357,29 @@ class Grid {
             csv += '\n';
         }
         return csv;
+    }
+    /** sets up racks based on a template function */
+    setup_racks(f, origin) {
+        this.tiles.forEach((l, x) => l.forEach((r, y) => {
+            if (x === origin[0] && y === origin[1]) {
+                r.classList.add(CLASS_UNLOAD);
+            }
+            if (f({ pos: [x, y], size: [this.w, this.h], ori: origin })) {
+                r.classList.add(CLASS_RACK);
+            }
+            else {
+                r.classList.remove(CLASS_RACK);
+            }
+        }));
+    }
+    /** colorizes racks based on a template function */
+    setup_colors(f, origin) {
+        this.tiles.forEach((l, x) => l.forEach((r, y) => {
+            r.dataset.type = f({ pos: [x, y], size: [this.w, this.h], ori: origin });
+        }));
+    }
+    clear_racks() {
+        document.querySelectorAll('.rack').forEach(e => take(e));
+        this.setup_racks(() => false);
     }
 }
