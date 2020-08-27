@@ -1,7 +1,7 @@
 // @ts-ignore
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CLASS_RACK = 'rack';
-const CLASS_LOAD = 'load-zone';
+//const CLASS_LOAD = 'load-zone';
 const CLASS_UNLOAD = 'unload-zone';
 const MAX_HEAT_LVL = 7;
 ;
@@ -44,6 +44,7 @@ class Grid {
         this.matrix = null;
         this.heatmap_on = false;
         this.max_heat = 0;
+        this.schemes = {};
         this.w = w;
         this.h = h;
         this.finder = new PF.AStarFinder({
@@ -73,17 +74,23 @@ class Grid {
         root.appendChild(grid);
         this.grid = grid;
     }
-    // TODO get rid of this thing
-    get schemes() { return ['plain', 'horiz', 'real', 'flyingv', 'fishbone']; }
-    scheme_name(id) {
-        switch (id) {
-            case 'plain': return 'Vertical';
-            case 'horiz': return 'Horizontal';
-            case 'real': return 'Combined';
-            case 'flyingv': return 'Flying V';
-            case 'fishbone': return 'Fishbone Aisles';
-            default: return id;
+    get available_schemes() {
+        return Object.keys(this.schemes);
+    }
+    register_scheme(id, scheme) {
+        this.schemes[id] = scheme;
+    }
+    setup_scheme(id) {
+        if (!Object.keys(this.schemes).includes(id)) {
+            throw Error(`scheme with id = '${id}' not found`);
         }
+        if (this.origin === undefined) {
+            throw Error(`this.origin must be a point, got ${str(this.origin)}`);
+        }
+        this.clear_racks();
+        this.setup_racks(this.schemes[id].rack_setup, this.origin);
+        this.setup_colors(this.schemes[id].color_setup, this.origin);
+        this.compute_distances(this.origin);
     }
     /** @deprecated
      * schemes: (1) spawn racks, (2) compute distances */
@@ -110,8 +117,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.default_colors([ori_x, ori_y]);
-        this.compute_distances(ori_x, ori_y);
+        //this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated */
     horiz_scheme() {
@@ -134,8 +140,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.default_colors([ori_x, ori_y]);
-        this.compute_distances(ori_x, ori_y);
+        //this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated
      * scheme based on a real warehouse */
@@ -177,8 +182,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.default_colors([ori_x, ori_y]);
-        this.compute_distances(ori_x, ori_y);
+        //this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated */
     flyingv_scheme() {
@@ -217,8 +221,7 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.default_colors([ori_x, ori_y]);
-        this.compute_distances(ori_x, ori_y);
+        //this.compute_distances(ori_x, ori_y);
     }
     /** @deprecated */
     fishbone_scheme() {
@@ -260,28 +263,10 @@ class Grid {
         const ori_x = this.w - 1;
         const ori_y = 0;
         this.tiles[ori_x][ori_y].classList.add(CLASS_UNLOAD);
-        this.default_colors([ori_x, ori_y]);
-        this.compute_distances(ori_x, ori_y);
+        //this.compute_distances(ori_x, ori_y);
     }
-    /** @deprecated
-    * a temporary function for setting colors up */
-    default_colors(ori) {
-        this.setup_colors((as) => {
-            const { pos, size } = as;
-            const half_w = (size[0] / 2) | 0;
-            const half_h = (size[1] / 2) | 0;
-            if (pos[0] < half_w && pos[1] < half_h)
-                return 'b';
-            else if (pos[0] >= half_w && pos[1] < half_h)
-                return 'a';
-            else if (pos[0] >= half_w && pos[1] >= half_h)
-                return 'd';
-            else if (pos[0] < half_w && pos[1] >= half_h)
-                return 'c';
-        }, ori);
-    }
-    compute_distances(ori_x, ori_y) {
-        document.querySelectorAll('.rack').forEach((x) => x.dataset.dist = this.path([ori_x, ori_y], [parseInt(x.dataset.x), parseInt(x.dataset.y)]).toString());
+    compute_distances(origin) {
+        document.querySelectorAll('.rack').forEach((x) => x.dataset.dist = this.path(origin, [parseInt(x.dataset.x), parseInt(x.dataset.y)]).toString());
     }
     mk_matrix() {
         let matrix = [];
@@ -361,7 +346,7 @@ class Grid {
     /** sets up racks based on a template function */
     setup_racks(f, origin) {
         this.tiles.forEach((l, x) => l.forEach((r, y) => {
-            if (x === origin[0] && y === origin[1]) {
+            if (origin && x === origin[0] && y === origin[1]) {
                 r.classList.add(CLASS_UNLOAD);
             }
             if (f({ pos: [x, y], size: [this.w, this.h], ori: origin })) {

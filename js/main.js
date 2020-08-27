@@ -158,22 +158,80 @@ function show_scheme_choice() {
     const url = new URL(location.href);
     const schm = url.searchParams.get('scheme');
     const root = location.href.split('?')[0];
-    grid.schemes.forEach(x => {
+    grid.available_schemes.forEach(x => {
         if (x === schm) {
-            ctrl.label(`${uni('bullet')} ${grid.scheme_name(x)} (current)`);
+            ctrl.label(`${uni('bullet')} ${grid.schemes[x].name} (current)`);
         }
         else {
-            ctrl.a(`${uni('bullet')} ${grid.scheme_name(x)}`, `${root}?scheme=${x}`);
+            ctrl.a(`${uni('bullet')} ${grid.schemes[x].name}`, `${root}?scheme=${x}`);
         }
     });
 }
 function init() {
     grid = new Grid(document.body, 105, 68);
     ctrl = new Ctrl();
+    grid.origin = [grid.w - 1, 0];
+    const default_colors = (as) => {
+        const { pos, size } = as;
+        const half_w = (size[0] / 2) | 0;
+        const half_h = (size[1] / 2) | 0;
+        if (pos[0] < half_w && pos[1] < half_h)
+            return 'b';
+        else if (pos[0] >= half_w && pos[1] < half_h)
+            return 'a';
+        else if (pos[0] >= half_w && pos[1] >= half_h)
+            return 'd';
+        else if (pos[0] < half_w && pos[1] >= half_h)
+            return 'c';
+    };
+    grid.register_scheme('plain', {
+        name: 'Vertical',
+        rack_setup: (as) => {
+            const { pos, size } = as;
+            if (pos[0] < 2 || pos[0] > size[0] - 3)
+                return false;
+            if (pos[1] < 2 || pos[1] > size[1] - 3)
+                return false;
+            if (pos[1] === ((size[1] / 2) | 0))
+                return false;
+            if ((pos[0] - 1) % 3 === 0)
+                return false;
+            return true;
+        },
+        color_setup: default_colors
+    });
+    //grid.register_scheme('horiz', {
+    //name: 'Horizontal',
+    //rack_setup: (as: TemplateArguments) => {
+    //},
+    //color_setup: (as: TemplateArguments) => {
+    //}
+    //});
+    //grid.register_scheme('real', {
+    //name: 'Combined',
+    //rack_setup: (as: TemplateArguments) => {
+    //},
+    //color_setup: (as: TemplateArguments) => {
+    //}
+    //});
+    //grid.register_scheme('flyingv', {
+    //name: 'Flying V',
+    //rack_setup: (as: TemplateArguments) => {
+    //},
+    //color_setup: (as: TemplateArguments) => {
+    //}
+    //});
+    //grid.register_scheme('fishbone', {
+    //name: 'Fishbone Aisles',
+    //rack_setup: (as: TemplateArguments) => {
+    //},
+    //color_setup: (as: TemplateArguments) => {
+    //}
+    //});
     const url = new URL(location.href);
     const schm = url.searchParams.get('scheme');
-    if (grid.schemes.includes(schm)) {
-        grid[`${schm}_scheme`]();
+    if (grid.available_schemes.includes(schm)) {
+        grid.setup_scheme(schm);
     }
     else {
         ctrl.header('Choose a scheme');
