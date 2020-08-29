@@ -200,13 +200,22 @@ function init() {
         },
         color_setup: default_colors
     });
-    //grid.register_scheme('horiz', {
-    //name: 'Horizontal',
-    //rack_setup: (as: TemplateArguments) => {
-    //},
-    //color_setup: (as: TemplateArguments) => {
-    //}
-    //});
+    grid.register_scheme('horiz', {
+        name: 'Horizontal',
+        rack_setup: (as) => {
+            const { pos, size } = as;
+            if (pos[0] < 2 || pos[0] > size[0] - 3)
+                return false;
+            if (pos[1] < 2 || pos[1] > size[1] - 3)
+                return false;
+            if (pos[0] === ((size[0] / 2) | 0))
+                return false;
+            if ((pos[1] - 1) % 3 === 0)
+                return false;
+            return true;
+        },
+        color_setup: default_colors
+    });
     //grid.register_scheme('real', {
     //name: 'Combined',
     //rack_setup: (as: TemplateArguments) => {
